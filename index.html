@@ -219,44 +219,46 @@ const GUIDE = `당신은 「2025 중등 논술형 평가 길라잡이」(경기�
   ]
 }`;
 
-/* ── Claude API 호출 ─────────────────────────────────────────── */
-async function callClaude({ apiKey, model, system, userText, images, maxTokens }) {
-  const content = [{ type:"text", text:userText }];
+/* ── Gemini API 호출 ─────────────────────────────────────────── */
+async function callGemini({ apiKey, model, system, userText, images, maxTokens }) {
+  const parts = [{ text:userText }];
   for (const img of images) {
-    content.push({ type:"image", source:{ type:"base64", media_type:img.mime, data:img.data } });
+    parts.push({ inline_data:{ mime_type:img.mime, data:img.data } });
   }
   const body = {
-    model,
-    max_tokens: maxTokens || 16000,
-    system,
-    messages: [
-      { role:"user", content },
-      { role:"assistant", content:"{" }, // JSON 강제용 prefill
-    ],
-  };
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method:"POST",
-    headers:{
-      "content-type":"application/json",
-      "x-api-key":apiKey,
-      "anthropic-version":"2023-06-01",
-      "anthropic-dangerous-direct-browser-access":"true",
+    system_instruction: { parts:[{ text:system }] },
+    contents: [{ role:"user", parts }],
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: maxTokens || 16000,
+      responseMimeType: "application/json", // JSON 출력 강제
     },
+  };
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/"
+    + encodeURIComponent(model) + ":generateContent?key=" + encodeURIComponent(apiKey);
+  const res = await fetch(url, {
+    method:"POST",
+    headers:{ "content-type":"application/json" },
     body: JSON.stringify(body),
   });
   if (!res.ok) {
     let msg = "API 오류 ("+res.status+")";
     try { const e = await res.json(); if (e.error && e.error.message) msg += ": "+e.error.message; } catch(_){}
-    if (res.status === 401) msg = "API 키가 올바르지 않습니다. 키를 다시 확인하세요.";
+    if (res.status === 400) msg = "요청이 거부되었습니다. API 키 또는 모델명을 확인하세요. ("+msg+")";
+    if (res.status === 403) msg = "API 키가 올바르지 않거나 권한이 없습니다. 키를 다시 확인하세요.";
     if (res.status === 429) msg = "요청 한도를 초과했습니다. 잠시 후 다시 시도하세요.";
     throw new Error(msg);
   }
   const data = await res.json();
-  const text = (data.content || []).filter(b=>b.type==="text").map(b=>b.text).join("");
-  const stop = data.stop_reason;
-  // prefill로 시작했으므로 앞에 "{"를 붙여 복원
-  let raw = "{" + text;
-  return { raw, stop };
+  const cand = (data.candidates || [])[0];
+  const stop = cand && cand.finishReason;
+  const text = cand && cand.content && cand.content.parts
+    ? cand.content.parts.map(p=>p.text||"").join("") : "";
+  if (!text) {
+    const block = data.promptFeedback && data.promptFeedback.blockReason;
+    throw new Error(block ? ("요청이 안전 정책으로 차단되었습니다: "+block) : "빈 응답을 받았습니다. 다시 시도해 주세요.");
+  }
+  return { raw:text, stop };
 }
 
 function parseResult(raw) {
@@ -315,8 +317,8 @@ function Pill({on, onClick, children, cls}) {
 }
 
 function App() {
-  const [apiKey, setApiKey]   = useState(()=>localStorage.getItem("anthropic_key")||"");
-  const [model, setModel]     = useState(()=>localStorage.getItem("anthropic_model")||"claude-sonnet-4-6");
+  const [apiKey, setApiKey]   = useState(()=>localStorage.getItem("gemini_key")||"");
+  const [model, setModel]     = useState(()=>localStorage.getItem("gemini_model")||"gemini-2.5-flash");
   const [subject, setSubject] = useState("자동");
   const [targets, setTargets] = useState([]);          // 타겟 수준 다중선택
   const [mode, setMode]       = useState("standard");
@@ -331,9 +333,14 @@ function App() {
   const [result, setResult]   = useState(null);
   const [showTeacher, setShowTeacher] = useState(true);
   const [copied, setCopied]   = useState(false);
+  const [runMode, setRunMode] = useState(()=>localStorage.getItem("run_mode")||"paste"); // "paste"=claude.ai(Pro/Max) · "api"=Gemini
+  const [promptCopied, setPromptCopied] = useState(false);
+  const [pasteText, setPasteText] = useState("");
 
-  useEffect(()=>{ if(apiKey) localStorage.setItem("anthropic_key", apiKey); }, [apiKey]);
-  useEffect(()=>{ localStorage.setItem("anthropic_model", model); }, [model]);
+  useEffect(()=>{ localStorage.setItem("run_mode", runMode); }, [runMode]);
+
+  useEffect(()=>{ if(apiKey) localStorage.setItem("gemini_key", apiKey); }, [apiKey]);
+  useEffect(()=>{ localStorage.setItem("gemini_model", model); }, [model]);
 
   function toggleTarget(l){ setTargets(t=> t.includes(l)? t.filter(x=>x!==l) : [...t, l]); }
 
@@ -391,18 +398,19 @@ function App() {
     return P.join("\n");
   }
 
+  // Gemini API 자동 호출 모드
   async function generate() {
     setError(""); setResult(null);
-    if (!apiKey.trim()) { setError("먼저 상단에 Claude API 키를 입력하세요."); return; }
+    if (!apiKey.trim()) { setError("먼저 상단에 Gemini API 키를 입력하세요."); return; }
     if (!text.trim() && !images.length) { setError("성취기준·문항·아이디어 등 입력 내용 또는 사진을 넣어주세요."); return; }
     setLoading(true);
     try {
-      const { raw, stop } = await callClaude({
+      const { raw, stop } = await callGemini({
         apiKey: apiKey.trim(), model: model.trim(), system: GUIDE,
         userText: buildPrompt(), images,
         maxTokens: 16000,
       });
-      if (stop === "max_tokens") {
+      if (stop === "MAX_TOKENS") {
         throw new Error("출력이 너무 길어 응답이 잘렸습니다. 문항 수를 줄이거나 그림자료를 끄고 다시 시도하세요.");
       }
       let parsed;
@@ -413,6 +421,31 @@ function App() {
       setError(e.message || String(e));
     } finally {
       setLoading(false);
+    }
+  }
+
+  // claude.ai 붙여넣기 모드 (Pro/Max, API 불필요)
+  function copyPromptForClaude() {
+    setError("");
+    if (!text.trim() && !images.length) { setError("성취기준·문항·아이디어 등 입력 내용 또는 사진을 넣어주세요."); return; }
+    const full =
+      GUIDE +
+      "\n\n========== 작업 지시 ==========\n" +
+      buildPrompt() +
+      (images.length ? "\n\n※ 이미지 자료는 이 메시지에 직접 첨부합니다. 첨부 이미지를 근거로 작업하세요." : "") +
+      "\n\n반드시 위 [출력 형식]의 JSON 객체 하나만 출력하세요. 코드블록이나 설명 문장은 넣지 마세요.";
+    navigator.clipboard.writeText(full).then(()=>{
+      setPromptCopied(true); setTimeout(()=>setPromptCopied(false), 2000);
+    });
+  }
+
+  function showPasted() {
+    setError(""); setResult(null);
+    if (!pasteText.trim()) { setError("claude.ai에서 받은 결과(JSON)를 붙여넣어 주세요."); return; }
+    try {
+      setResult(parseResult(pasteText));
+    } catch(e) {
+      setError("붙여넣은 내용을 JSON으로 해석하지 못했습니다. claude.ai 응답 전체(중괄호 { } 포함)를 그대로 복사해 붙여넣었는지 확인하세요.");
     }
   }
 
@@ -429,29 +462,42 @@ function App() {
     <div className="wrap">
       <header className="app">
         <h1>논술형 평가 문항 스튜디오</h1>
-        <p>「2025 중등 논술형 평가 길라잡이」(경기도교육청) 방법론 기반 · 2022 개정 교육과정 · Claude API</p>
+        <p>「2025 중등 논술형 평가 길라잡이」(경기도교육청) 방법론 기반 · 2022 개정 교육과정</p>
       </header>
 
-      {/* 0. API */}
+      {/* 0. 실행 방식 */}
       <div className="card">
-        <h2><span className="num">0</span> Claude API 설정</h2>
-        <div className="row">
-          <div style={{flex:2}}>
-            <label className="fld">API 키 (sk-ant-…)</label>
-            <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)}
-              placeholder="sk-ant-..." />
-          </div>
-          <div>
-            <label className="fld">모델</label>
-            <input type="text" value={model} onChange={e=>setModel(e.target.value)} />
-          </div>
+        <h2><span className="num">0</span> 실행 방식</h2>
+        <div className="pills">
+          <Pill on={runMode==="paste"} onClick={()=>setRunMode("paste")}>claude.ai 붙여넣기 (Pro·Max · API 불필요)</Pill>
+          <Pill on={runMode==="api"} onClick={()=>setRunMode("api")}>Gemini API 자동 호출</Pill>
         </div>
         <div className="hint">
-          키는 이 브라우저(localStorage)에만 저장되며 코드·서버에 전송되지 않습니다.
-          키 발급: console.anthropic.com → API Keys. 모델 예시: <code>claude-sonnet-4-6</code>(기본),
-          빠르고 저렴: <code>claude-haiku-4-5-20251001</code>.
-          {apiKey && <a href="#" style={{marginLeft:8,color:"var(--warn)"}} onClick={ev=>{ev.preventDefault(); setApiKey(""); localStorage.removeItem("anthropic_key");}}>키 지우기</a>}
+          {runMode==="paste"
+            ? "Claude Pro/Max 구독으로 claude.ai에서 직접 생성합니다. 앱이 만든 프롬프트를 복사해 claude.ai에 붙여넣고, 나온 결과를 다시 아래에 붙여넣으면 표로 정리됩니다. API 키가 필요 없습니다."
+            : "본인 Gemini API 키로 앱 안에서 바로 생성합니다."}
         </div>
+
+        {runMode==="api" &&
+          <div style={{marginTop:14,borderTop:"1px dashed var(--line)",paddingTop:14}}>
+            <div className="row">
+              <div style={{flex:2}}>
+                <label className="fld">Gemini API 키 (AIza…)</label>
+                <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)}
+                  placeholder="AIza..." />
+              </div>
+              <div>
+                <label className="fld">모델</label>
+                <input type="text" value={model} onChange={e=>setModel(e.target.value)} />
+              </div>
+            </div>
+            <div className="hint">
+              키는 이 브라우저(localStorage)에만 저장되며 코드·서버에 전송되지 않습니다.
+              키 발급: aistudio.google.com → Get API key(카드 등록 불필요). 모델 예시: <code>gemini-2.5-flash</code>(기본),
+              더 정교하게: <code>gemini-2.5-pro</code>.
+              {apiKey && <a href="#" style={{marginLeft:8,color:"var(--warn)"}} onClick={ev=>{ev.preventDefault(); setApiKey(""); localStorage.removeItem("gemini_key");}}>키 지우기</a>}
+            </div>
+          </div>}
       </div>
 
       {/* 1. 과목 */}
@@ -543,9 +589,28 @@ function App() {
         </div>
       </div>
 
-      <button className="btn" onClick={generate} disabled={loading} style={{width:"100%",fontSize:16}}>
-        {loading ? <><span className="spin"></span>생성 중…</> : "문항 · 루브릭 생성"}
-      </button>
+      {runMode==="api" &&
+        <button className="btn" onClick={generate} disabled={loading} style={{width:"100%",fontSize:16}}>
+          {loading ? <><span className="spin"></span>생성 중…</> : "문항 · 루브릭 생성"}
+        </button>}
+
+      {runMode==="paste" &&
+        <div className="card">
+          <h2>claude.ai로 생성하기 (API 불필요)</h2>
+          <button className="btn" onClick={copyPromptForClaude} style={{width:"100%",fontSize:15}}>
+            {promptCopied ? "프롬프트 복사됨 ✓" : "① claude.ai용 프롬프트 복사"}
+          </button>
+          <ol style={{fontSize:13,color:"var(--muted)",margin:"12px 0 0",paddingLeft:20,lineHeight:1.8}}>
+            <li><b>claude.ai</b>에 로그인해 새 대화를 엽니다(Pro/Max 구독).</li>
+            <li>방금 복사한 프롬프트를 붙여넣습니다{`. `}{<span>사진을 넣었다면 그 대화에 이미지도 함께 첨부하세요.</span>}</li>
+            <li>Claude가 출력한 <b>결과 전체(중괄호 {`{ }`} 포함)</b>를 복사합니다.</li>
+            <li>아래 칸에 붙여넣고 <b>③ 결과 표시</b>를 누르면 표로 정리됩니다.</li>
+          </ol>
+          <label className="fld" style={{marginTop:14}}>② claude.ai 응답(JSON) 붙여넣기</label>
+          <textarea value={pasteText} onChange={e=>setPasteText(e.target.value)}
+            placeholder='{ "curriculum": "2022", ... }' style={{minHeight:120,fontFamily:"monospace",fontSize:12}} />
+          <button className="btn sec" onClick={showPasted} style={{marginTop:10}}>③ 결과 표시</button>
+        </div>}
 
       {error && <div className="err">⚠ {error}</div>}
 
