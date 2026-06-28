@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>논술형 평가 문항 스튜디오</title>
+<style>
+  :root{
+    --bg:#f4f1ea; --panel:#ffffff; --ink:#23211c; --muted:#6b665b;
+    --line:#e3ddcf; --accent:#3a5a40; --accent-soft:#dfe7df;
+    --gold:#a07b22; --gold-soft:#fbf3dd; --blue:#274c77; --blue-soft:#e4ecf5;
+    --warn:#b9560f; --warn-soft:#fbe7d6; --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    line-height:1.6;}
+  .wrap{max-width:980px;margin:0 auto;padding:24px 18px 80px;}
+  header.app{padding:14px 0 6px;border-bottom:2px solid var(--accent);margin-bottom:22px;}
+  header.app h1{margin:0;font-size:24px;letter-spacing:-.3px;}
+  header.app p{margin:6px 0 0;color:var(--muted);font-size:14px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .card h2{margin:0 0 12px;font-size:15px;color:var(--accent);
+    display:flex;align-items:center;gap:8px;}
+  .num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+    background:var(--accent);color:#fff;border-radius:50%;font-size:12px;font-weight:700;}
+  label.fld{display:block;font-size:13px;color:var(--muted);margin:0 0 5px;font-weight:600;}
+  input[type=text],input[type=password],input[type=number],select,textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;
+    font:inherit;background:#fff;color:var(--ink);}
+  textarea{min-height:120px;resize:vertical;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;}
+  .row > div{flex:1;min-width:160px;}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;}
+  .pill{padding:7px 13px;border:1px solid var(--line);border-radius:999px;background:#fff;
+    cursor:pointer;font-size:13px;user-select:none;}
+  .pill.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .pill.lv.on{background:var(--gold);border-color:var(--gold);}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px;}
+  .btn{appearance:none;border:none;border-radius:10px;padding:13px 20px;font-size:15px;font-weight:700;
+    cursor:pointer;background:var(--accent);color:#fff;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn.sec{background:#fff;color:var(--accent);border:1px solid var(--accent);font-size:13px;padding:8px 14px;font-weight:600;}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);font-size:13px;padding:8px 14px;font-weight:600;}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;}
+  .badge.b22{background:var(--accent-soft);color:var(--accent);}
+  .badge.b15{background:var(--warn-soft);color:var(--warn);}
+  .note{background:var(--warn-soft);border:1px solid #f0d3b8;color:#7c3d0b;border-radius:9px;
+    padding:11px 13px;font-size:13px;margin:10px 0;}
+  .note.info{background:var(--blue-soft);border-color:#cfe0f2;color:#1d3a5c;}
+  .item{border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:14px 0;}
+  .item h3{margin:0 0 10px;font-size:16px;}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;}
+  .tag{font-size:11px;padding:2px 9px;border-radius:6px;background:#eee9dd;color:#6b5e3a;font-weight:600;}
+  .tag.fmt{background:var(--accent-soft);color:var(--accent);}
+  .tag.lvl{background:var(--gold-soft);color:var(--gold);}
+  .tag.data{background:var(--blue-soft);color:var(--blue);}
+  .stem{font-size:15px;margin:10px 0;}
+  .cond{margin:8px 0;padding-left:18px;}
+  .cond li{font-size:14px;margin:3px 0;}
+  .box{border-radius:9px;padding:12px 14px;margin:10px 0;font-size:14px;}
+  .box.gold{background:var(--gold-soft);border:1px solid #ecd9a3;}
+  .box.blue{background:var(--blue-soft);border:1px solid #cfe0f2;}
+  .box h4{margin:0 0 6px;font-size:13px;letter-spacing:.2px;}
+  table.rub{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+  table.rub th,table.rub td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top;}
+  table.rub th{background:#f6f3eb;width:64px;}
+  .visual{border:1px solid var(--line);border-radius:9px;padding:12px;background:#fff;margin:10px 0;text-align:center;}
+  .visual svg{max-width:100%;height:auto;}
+  .visual .cap{font-size:12px;color:var(--muted);margin-top:6px;}
+  .elems{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .elems .e{background:#f6f3eb;border-radius:9px;padding:10px;}
+  .elems .e b{display:block;font-size:12px;color:var(--accent);margin-bottom:5px;}
+  .elems .e ul{margin:0;padding-left:16px;font-size:13px;}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid #ffffff80;border-top-color:#fff;
+    border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px;margin-right:8px;}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .err{background:var(--warn-soft);border:1px solid #f0c4a0;color:#8a3a06;border-radius:9px;padding:12px 14px;margin:12px 0;font-size:14px;}
+  .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .thumb{position:relative;}
+  .thumb img{width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--line);}
+  .thumb button{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;
+    border:none;background:#b9560f;color:#fff;cursor:pointer;font-size:12px;line-height:1;}
+  @media(max-width:620px){.elems{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect } = React;
+
+/* ──────────────────────────────────────────────────────────────
+   교육과정 데이터 — 2022 개정 과학과 (위계 순서)
+   각 과목은 hierarchy 레벨(낮을수록 하위 학년/기초)을 가진다.
+   상위 레벨 과목에서 처음 도입되는 개념은 선행학습 방지를 위해 배제.
+   ────────────────────────────────────────────────────────────── */
+const SUBJECTS = [
+  { v:"중학교 과학", lv:0, group:"중학교" },
+  { v:"통합과학1", lv:1, group:"고1 공통" },
+  { v:"통합과학2", lv:1, group:"고1 공통" },
+  { v:"과학탐구실험1", lv:1, group:"고1 공통" },
+  { v:"과학탐구실험2", lv:1, group:"고1 공통" },
+  { v:"물리학", lv:2, group:"일반선택" },
+  { v:"화학", lv:2, group:"일반선택" },
+  { v:"생명과학", lv:2, group:"일반선택" },
+  { v:"지구과학", lv:2, group:"일반선택" },
+  { v:"역학과 에너지", lv:3, group:"진로선택" },
+  { v:"전자기와 양자", lv:3, group:"진로선택" },
+  { v:"물질과 에너지", lv:3, group:"진로선택" },
+  { v:"화학 반응의 세계", lv:3, group:"진로선택" },
+  { v:"세포와 물질대사", lv:3, group:"진로선택" },
+  { v:"생물의 유전", lv:3, group:"진로선택" },
+  { v:"지구시스템과학", lv:3, group:"진로선택" },
+  { v:"행성우주과학", lv:3, group:"진로선택" },
+  { v:"과학의 역사와 문화", lv:4, group:"융합선택" },
+  { v:"기후변화와 환경생태", lv:4, group:"융합선택" },
+  { v:"융합과학 탐구", lv:4, group:"융합선택" },
+];
+
+// 문항 형식 (FORMATS 6종 + 자동)
+const FORMATS = ["자동","자료제시형","문제해결형","비교분석형","논증형","실험탐구형","자유서술형"];
+
+// 입력 방식
+const MODES = [
+  { v:"standard",  t:"성취기준 → 문항 생성", d:"성취기준·성취수준을 입력해 새 문항 제작" },
+  { v:"convert",   t:"지필/학력평가 → 논술형 변환", d:"선다형·단답형 등을 논술형으로 변환" },
+  { v:"transform", t:"논술형 → 변형", d:"기존 논술형 문항을 새 소재로 변형" },
+  { v:"idea",      t:"아이디어·주제로 만들기", d:"주제·키워드만으로 문항 제작" },
+];
+
+// 성취수준 (LEVELS A~E)
+const LEVELS = ["A","B","C","D","E"];
+
+// 그림자료 옵션
+const VISUALS = [
+  { v:"auto",   t:"필요하면 생성" },
+  { v:"always", t:"반드시 생성" },
+  { v:"none",   t:"생성 안 함" },
+];
+
+// 길라잡이 반응 지시어 17종
+const DIRECTIVES = ["요약","분류","비교","대조","분석","추론","적용","논증","설명",
+  "예측","평가","종합","해석","서술","구분","제안","도출"];
+
+/* ──────────────────────────────────────────────────────────────
+   시스템 지침 (GUIDE) — 「2025 중등 논술형 평가 길라잡이」(경기도교육청) 방법론
+   ────────────────────────────────────────────────────────────── */
+const GUIDE = `당신은 「2025 중등 논술형 평가 길라잡이」(경기도교육청)의 방법론을 따르는 과학과 논술형 평가 문항 출제 전문가다.
+
+[문항 제작 절차]
+1) 성취기준·성취수준 분석 → 2) 평가요소(내용요소) 도출 → 3) 문항 제작(발문·자료·조건) → 4) 채점기준표 작성. 이 순서를 따른다.
+
+[문항 구성요소]
+- 발문: 학생이 무엇을 수행할지 직접 또는 간접 방식으로 명확히 제시한다.
+- 자료: 제시문·그림자료 등. 문항 해결에 실제로 필요할 때만 넣는다(장식 금지).
+- 조건: 답안의 범위·형식·분량·근거 사용 등을 한정한다.
+
+[반응 지시어 17종] 요약·분류·비교·대조·분석·추론·적용·논증·설명·예측·평가·종합·해석·서술·구분·제안·도출 중에서 문항 의도에 맞는 것을 골라 발문에 사용한다.
+
+[평가요소 표기] 평가요소는 반드시 명사형 '~하기'로 적는다(예: "광합성 산물 비교하기").
+
+[자료-발문 연계 원칙] 제시문이나 그림자료가 있으면, 최소 한 문항 이상이 그 자료를 직접 분석·해석해야만 풀 수 있도록 발문·조건을 구성한다. 발문/조건에서 자료를 명시적으로 가리킨다("제시문의 ~를 근거로", "그림 (가)와 (나)를 비교하여"). 자료에 없는 사실을 묻거나 답의 단서를 자료에서 빠뜨리지 않는다. 자료 없이 일반 지식만으로 풀리는 문항은 배제한다.
+
+[채점기준표 원칙] 분석적 채점을 원칙으로 하고, 수준 간 변별 기준이 서로 중복되지 않게 작성한다. 척도는 성취수준과 동일하게 A·B·C·D·E 5단계로 한다.
+
+[성취수준과 최소능력자 변별] 성취수준은 A~E 5단계다. 각 문항의 '타겟 수준'은 그 수준의 최소능력자(borderline)를 기준으로 설계한다. 예: 타겟이 C인 문항은 A·B·C 수준 학생은 해결하고 D·E 수준 학생은 해결하지 못하는 변별점을 갖는다. 타겟 수준에 해당하는 성취수준의 내용요소(지식·이해/과정·기능/가치·태도)를 분석해 변별점을 설계한다.
+
+[교육과정 정합성] 2022 개정 과학과를 기본으로 한다. 입력된 성취기준 코드가 2015 개정(과목명에 로마숫자 Ⅰ·Ⅱ가 붙거나 통합과학 코드가 [10통과01-..] 형태)인 경우, curriculum을 "2015"로 판정하고 대응하는 2022 개정 과목·표기를 standardNote에 안내한다. 2022 개정이면 "2022"로 판정한다.
+
+[위계 통제] 대상 과목이 지정되면, 그 과목의 학습 범위 안에서만 출제한다. 상위 학년·심화 과목에서 처음 도입되는 개념은 제시문·문항·조건·모범답안에서 배제한다. 어떤 상위 개념을 배제했는지 hierarchyBlock에 한 문장으로 기술한다.
+
+[모범답안] 각 문항마다 발문과 조건을 모두 충족하는 A수준 모범답안을 작성한다. 채점기준표의 A수준 기술과 일치시킨다. 제시문·그림자료가 있으면 그 구체적 내용을 인용한다.
+
+[그림자료] 그림자료는 실사 사진이 아니라 SVG 벡터 도식(분류 도표·그래프·구조 모식도·실험 장치도 등)으로 만든다. viewBox를 지정하고, 한글 라벨을 또렷하게, 흑백·고대비로 인쇄에 적합하게 그린다. width/height 속성 대신 viewBox만 사용해 반응형이 되게 한다.
+
+[출력 형식] 반드시 아래 JSON 스키마의 객체 하나만 출력한다. 코드펜스나 설명 문장을 절대 포함하지 않는다. 한국어로 작성한다.
+
+{
+  "curriculum": "2022" | "2015",
+  "standardCode": "감지된 성취기준 코드 또는 ''",
+  "standardText": "성취기준 문장(있으면) 또는 ''",
+  "standardNote": "교육과정 혼용/대응 안내 또는 ''",
+  "subjectScope": "출제에 적용한 과목 범위 설명",
+  "hierarchyBlock": "위계상 배제한 상위 개념 설명 또는 ''",
+  "contentElements": { "knowledge": ["지식·이해 요소"], "process": ["과정·기능 요소"], "value": ["가치·태도 요소"] },
+  "evaluationElements": ["명사형 ~하기 평가요소"],
+  "passage": { "title": "", "body": "" } 또는 null,
+  "visual": { "caption": "", "svg": "<svg viewBox=...>...</svg>" } 또는 null,
+  "items": [
+    {
+      "number": 1,
+      "format": "자료제시형",
+      "directive": "비교",
+      "targetLevel": "C",
+      "stem": "발문",
+      "conditions": ["조건1","조건2"],
+      "usesData": ["제시문","그림자료"],
+      "modelAnswer": "A수준 모범답안",
+      "levelAnalysis": {
+        "standardElements": "이 문항이 성취기준에서 가져온 내용요소",
+        "levelElements": "타겟 수준 성취수준의 내용요소 분석",
+        "rationale": "왜 타겟 수준 이상은 도달하고 미만은 도달하지 못하는지 근거"
+      },
+      "rubric": [
+        { "level":"A", "descriptor":"수행 특성" },
+        { "level":"B", "descriptor":"" },
+        { "level":"C", "descriptor":"" },
+        { "level":"D", "descriptor":"" },
+        { "level":"E", "descriptor":"" }
+      ]
+    }
+  ]
+}`;
+
+/* ── Claude API 호출 ─────────────────────────────────────────── */
+async function callClaude({ apiKey, model, system, userText, images, maxTokens }) {
+  const content = [{ type:"text", text:userText }];
+  for (const img of images) {
+    content.push({ type:"image", source:{ type:"base64", media_type:img.mime, data:img.data } });
+  }
+  const body = {
+    model,
+    max_tokens: maxTokens || 16000,
+    system,
+    messages: [
+      { role:"user", content },
+      { role:"assistant", content:"{" }, // JSON 강제용 prefill
+    ],
+  };
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{
+      "content-type":"application/json",
+      "x-api-key":apiKey,
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access":"true",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    let msg = "API 오류 ("+res.status+")";
+    try { const e = await res.json(); if (e.error && e.error.message) msg += ": "+e.error.message; } catch(_){}
+    if (res.status === 401) msg = "API 키가 올바르지 않습니다. 키를 다시 확인하세요.";
+    if (res.status === 429) msg = "요청 한도를 초과했습니다. 잠시 후 다시 시도하세요.";
+    throw new Error(msg);
+  }
+  const data = await res.json();
+  const text = (data.content || []).filter(b=>b.type==="text").map(b=>b.text).join("");
+  const stop = data.stop_reason;
+  // prefill로 시작했으므로 앞에 "{"를 붙여 복원
+  let raw = "{" + text;
+  return { raw, stop };
+}
+
+function parseResult(raw) {
+  let s = raw.trim();
+  // 혹시 코드펜스가 들어오면 제거
+  s = s.replace(/^```(json)?/i,"").replace(/```$/,"").trim();
+  // 첫 { ~ 마지막 } 구간만 취함
+  const a = s.indexOf("{"), b = s.lastIndexOf("}");
+  if (a >= 0 && b > a) s = s.slice(a, b+1);
+  return JSON.parse(s);
+}
+
+/* ── 마크다운 변환 ──────────────────────────────────────────── */
+function toMarkdown(r, showTeacher) {
+  const L = [];
+  L.push("# 논술형 평가 문항");
+  L.push(`- 교육과정: ${r.curriculum === "2015" ? "2015 개정" : "2022 개정"}`);
+  if (r.standardCode) L.push(`- 성취기준 코드: ${r.standardCode}`);
+  if (r.standardText) L.push(`- 성취기준: ${r.standardText}`);
+  if (r.subjectScope) L.push(`- 과목 범위: ${r.subjectScope}`);
+  if (r.standardNote) L.push(`> ⚠ ${r.standardNote}`);
+  if (r.hierarchyBlock) L.push(`> 🧭 위계 점검: ${r.hierarchyBlock}`);
+  L.push("");
+  const ce = r.contentElements || {};
+  L.push("## 내용요소");
+  L.push(`- 지식·이해: ${(ce.knowledge||[]).join(", ")}`);
+  L.push(`- 과정·기능: ${(ce.process||[]).join(", ")}`);
+  L.push(`- 가치·태도: ${(ce.value||[]).join(", ")}`);
+  if ((r.evaluationElements||[]).length) { L.push(""); L.push("## 평가요소"); (r.evaluationElements||[]).forEach(e=>L.push(`- ${e}`)); }
+  if (r.passage) { L.push(""); L.push(`## 제시문${r.passage.title?` — ${r.passage.title}`:""}`); L.push(r.passage.body||""); }
+  if (r.visual) { L.push(""); L.push(`## 그림자료`); L.push(`(SVG 도식: ${r.visual.caption||""})`); }
+  (r.items||[]).forEach(it=>{
+    L.push(""); L.push(`## 문항 ${it.number}`);
+    L.push(`- 형식: ${it.format} / 반응지시어: ${it.directive} / 타겟 수준: ${it.targetLevel}`);
+    if ((it.usesData||[]).length) L.push(`- 활용 자료: ${(it.usesData||[]).join(", ")}`);
+    L.push(""); L.push(it.stem||"");
+    if ((it.conditions||[]).length){ L.push(""); L.push("**조건**"); (it.conditions||[]).forEach(c=>L.push(`- ${c}`)); }
+    if (showTeacher) {
+      const la = it.levelAnalysis || {};
+      L.push(""); L.push("**수준 설계 해설**");
+      L.push(`- 성취기준 내용요소: ${la.standardElements||""}`);
+      L.push(`- 해당 수준 내용요소: ${la.levelElements||""}`);
+      L.push(`- 수준 적합성: ${la.rationale||""}`);
+      L.push(""); L.push("**모범답안(A수준)**"); L.push(it.modelAnswer||"");
+      L.push(""); L.push("**채점기준표**");
+      L.push("| 수준 | 수행 특성 |"); L.push("|---|---|");
+      (it.rubric||[]).forEach(rb=>L.push(`| ${rb.level} | ${(rb.descriptor||"").replace(/\n/g," ")} |`));
+    }
+  });
+  return L.join("\n");
+}
+
+/* ── UI 컴포넌트 ────────────────────────────────────────────── */
+function Pill({on, onClick, children, cls}) {
+  return <span className={"pill "+(cls||"")+(on?" on":"")} onClick={onClick}>{children}</span>;
+}
+
+function App() {
+  const [apiKey, setApiKey]   = useState(()=>localStorage.getItem("anthropic_key")||"");
+  const [model, setModel]     = useState(()=>localStorage.getItem("anthropic_model")||"claude-sonnet-4-6");
+  const [subject, setSubject] = useState("자동");
+  const [targets, setTargets] = useState([]);          // 타겟 수준 다중선택
+  const [mode, setMode]       = useState("standard");
+  const [text, setText]       = useState("");
+  const [images, setImages]   = useState([]);
+  const [format, setFormat]   = useState("자동");
+  const [style, setStyle]     = useState("");
+  const [visual, setVisual]   = useState("auto");
+  const [count, setCount]     = useState(2);
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState("");
+  const [result, setResult]   = useState(null);
+  const [showTeacher, setShowTeacher] = useState(true);
+  const [copied, setCopied]   = useState(false);
+
+  useEffect(()=>{ if(apiKey) localStorage.setItem("anthropic_key", apiKey); }, [apiKey]);
+  useEffect(()=>{ localStorage.setItem("anthropic_model", model); }, [model]);
+
+  function toggleTarget(l){ setTargets(t=> t.includes(l)? t.filter(x=>x!==l) : [...t, l]); }
+
+  function onFiles(e){
+    const files = Array.from(e.target.files||[]);
+    files.forEach(f=>{
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        const res = reader.result;       // data:<mime>;base64,xxxx
+        const mime = res.substring(5, res.indexOf(";"));
+        const data = res.substring(res.indexOf(",")+1);
+        setImages(prev=>[...prev, { mime, data, url:res, name:f.name }]);
+      };
+      reader.readAsDataURL(f);
+    });
+    e.target.value = ""; // 같은 파일 재선택 허용
+  }
+  function removeImage(i){ setImages(prev=>prev.filter((_,idx)=>idx!==i)); }
+
+  function buildPrompt() {
+    const P = [];
+    const modeText = {
+      standard:"아래에 주어진 성취기준(및 성취수준)을 바탕으로 논술형 평가 문항을 제작하라.",
+      convert:"아래에 주어진 지필/선다형/단답형/학력평가 문항을 같은 성취기준·개념을 유지한 채 논술형 평가 문항으로 변환하라.",
+      transform:"아래에 주어진 논술형 문항을 평가 의도는 유지하되 소재·맥락을 바꾸어 새로운 논술형 문항으로 변형하라.",
+      idea:"아래에 주어진 아이디어·주제·키워드를 바탕으로 논술형 평가 문항을 제작하라.",
+    }[mode];
+    P.push(modeText);
+    P.push(`제작할 문항 수: ${count}개.`);
+
+    if (subject !== "자동") {
+      const cur = SUBJECTS.find(s=>s.v===subject);
+      const higher = SUBJECTS.filter(s=>s.lv > cur.lv).map(s=>s.v);
+      P.push(`대상 과목: '${subject}'. 이 과목의 학습 범위 안에서만 출제하고, 상위/심화 과목(${higher.join(", ")})에서 처음 도입되는 개념은 제시문·문항·조건·모범답안에서 배제하라(선행학습 방지). 배제한 상위 개념을 hierarchyBlock에 기술하라.`);
+    } else {
+      P.push("대상 과목: 자동. 성취기준에서 수준을 추정해 출제하되 위계 통제는 적용하지 않는다(hierarchyBlock는 '').");
+    }
+
+    if (targets.length) {
+      P.push(`각 문항의 타겟 성취수준: ${targets.join(", ")}. ${targets.length===1?"모든 문항을 이 수준으로 설계하라.":"문항마다 위 수준들을 고르게 배분하라."} 타겟이 C인 문항이라면 A·B·C 수준 학생은 해결하고 D·E 수준 학생은 해결하지 못하는 변별점을 갖도록 최소능력자 기준으로 설계하라. 각 문항 levelAnalysis에 근거를 적어라.`);
+    } else {
+      P.push("타겟 성취수준: 자동(난이도를 고르게 분포). 각 문항에 적절한 targetLevel을 지정하라.");
+    }
+
+    P.push(format==="자동" ? "문항 형식: 내용에 맞게 자동 선택." : `문항 형식: '${format}'으로 고정.`);
+
+    P.push(visual==="always" ? "그림자료: 적절한 모든 문항에 SVG 도식을 반드시 생성하라."
+        : visual==="none"   ? "그림자료: 생성하지 말라(visual=null)."
+        : "그림자료: 자료가 필요한 경우에만 SVG 도식을 생성하라.");
+
+    if (style.trim()) P.push(`추가 스타일/요청: ${style.trim()}`);
+    if (images.length) P.push(`첨부 이미지 ${images.length}장이 있다. 이미지 속 문항·자료·표·그림을 읽어 반영하라.`);
+
+    P.push("\n[입력 내용]\n" + (text.trim() || "(텍스트 입력 없음 — 첨부 이미지를 근거로 작업하라.)"));
+    return P.join("\n");
+  }
+
+  async function generate() {
+    setError(""); setResult(null);
+    if (!apiKey.trim()) { setError("먼저 상단에 Claude API 키를 입력하세요."); return; }
+    if (!text.trim() && !images.length) { setError("성취기준·문항·아이디어 등 입력 내용 또는 사진을 넣어주세요."); return; }
+    setLoading(true);
+    try {
+      const { raw, stop } = await callClaude({
+        apiKey: apiKey.trim(), model: model.trim(), system: GUIDE,
+        userText: buildPrompt(), images,
+        maxTokens: 16000,
+      });
+      if (stop === "max_tokens") {
+        throw new Error("출력이 너무 길어 응답이 잘렸습니다. 문항 수를 줄이거나 그림자료를 끄고 다시 시도하세요.");
+      }
+      let parsed;
+      try { parsed = parseResult(raw); }
+      catch(e){ throw new Error("결과(JSON) 해석에 실패했습니다. 문항 수를 줄여 다시 시도해 주세요."); }
+      setResult(parsed);
+    } catch(e) {
+      setError(e.message || String(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function copyMd() {
+    if (!result) return;
+    const md = toMarkdown(result, showTeacher);
+    navigator.clipboard.writeText(md).then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),1500); });
+  }
+
+  // 과목 그룹핑 (드롭다운 optgroup)
+  const groups = SUBJECTS.reduce((m,s)=>{ (m[s.group]=m[s.group]||[]).push(s); return m; }, {});
+
+  return (
+    <div className="wrap">
+      <header className="app">
+        <h1>논술형 평가 문항 스튜디오</h1>
+        <p>「2025 중등 논술형 평가 길라잡이」(경기도교육청) 방법론 기반 · 2022 개정 교육과정 · Claude API</p>
+      </header>
+
+      {/* 0. API */}
+      <div className="card">
+        <h2><span className="num">0</span> Claude API 설정</h2>
+        <div className="row">
+          <div style={{flex:2}}>
+            <label className="fld">API 키 (sk-ant-…)</label>
+            <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)}
+              placeholder="sk-ant-..." />
+          </div>
+          <div>
+            <label className="fld">모델</label>
+            <input type="text" value={model} onChange={e=>setModel(e.target.value)} />
+          </div>
+        </div>
+        <div className="hint">
+          키는 이 브라우저(localStorage)에만 저장되며 코드·서버에 전송되지 않습니다.
+          키 발급: console.anthropic.com → API Keys. 모델 예시: <code>claude-sonnet-4-6</code>(기본),
+          빠르고 저렴: <code>claude-haiku-4-5-20251001</code>.
+          {apiKey && <a href="#" style={{marginLeft:8,color:"var(--warn)"}} onClick={ev=>{ev.preventDefault(); setApiKey(""); localStorage.removeItem("anthropic_key");}}>키 지우기</a>}
+        </div>
+      </div>
+
+      {/* 1. 과목 */}
+      <div className="card">
+        <h2><span className="num">1</span> 대상 과목 <span style={{fontWeight:400,color:"var(--muted)",fontSize:12}}>(위계·선행학습 통제)</span></h2>
+        <select value={subject} onChange={e=>setSubject(e.target.value)}>
+          <option value="자동">자동 (위계 통제 안 함)</option>
+          {Object.keys(groups).map(g=>(
+            <optgroup key={g} label={g}>
+              {groups[g].map(s=><option key={s.v} value={s.v}>{s.v}</option>)}
+            </optgroup>
+          ))}
+        </select>
+        <div className="hint">과목을 고르면 그 범위 안에서만 출제하고 상위 학년·심화 개념을 배제합니다.</div>
+      </div>
+
+      {/* 2. 타겟 수준 */}
+      <div className="card">
+        <h2><span className="num">2</span> 문항 타겟 수준 <span style={{fontWeight:400,color:"var(--muted)",fontSize:12}}>(최소능력자 변별)</span></h2>
+        <div className="pills">
+          {LEVELS.map(l=><Pill key={l} cls="lv" on={targets.includes(l)} onClick={()=>toggleTarget(l)}>{l} 수준</Pill>)}
+        </div>
+        <div className="hint">비워두면 난이도가 자동 분포됩니다. 예: C 선택 시 A·B·C는 풀고 D·E는 못 푸는 변별점으로 설계.</div>
+      </div>
+
+      {/* 3. 입력 방식 */}
+      <div className="card">
+        <h2><span className="num">3</span> 입력 방식</h2>
+        <div className="pills">
+          {MODES.map(m=><Pill key={m.v} on={mode===m.v} onClick={()=>setMode(m.v)}>{m.t}</Pill>)}
+        </div>
+        <div className="hint">{MODES.find(m=>m.v===mode).d}</div>
+      </div>
+
+      {/* 4. 입력 내용 */}
+      <div className="card">
+        <h2><span className="num">4</span> 입력 내용</h2>
+        <textarea value={text} onChange={e=>setText(e.target.value)}
+          placeholder={
+            mode==="standard" ? "성취기준(및 성취수준)을 붙여넣으세요. 예: [10통과1-02-01] ..." :
+            mode==="convert"  ? "변환할 지필/선다형 문항을 붙여넣으세요." :
+            mode==="transform"? "변형할 논술형 문항을 붙여넣으세요." :
+                                "주제·아이디어·키워드를 적으세요. 예: 광합성과 세포호흡의 관계"
+          } />
+        <div style={{marginTop:10}}>
+          <label className="btn ghost" style={{display:"inline-block",cursor:"pointer"}}>
+            📷 사진 올리기
+            <input type="file" accept="image/*" multiple onChange={onFiles} style={{display:"none"}} />
+          </label>
+          {images.length>0 &&
+            <div className="thumbs">
+              {images.map((im,i)=>(
+                <div className="thumb" key={i}>
+                  <img src={im.url} alt={im.name}/>
+                  <button onClick={()=>removeImage(i)} title="삭제">×</button>
+                </div>
+              ))}
+            </div>}
+        </div>
+        <div className="hint">글·사진을 함께 넣을 수 있습니다. 사진 속 문항·자료·표·그림을 읽어 반영합니다.</div>
+      </div>
+
+      {/* 5. 형식·스타일·그림자료 */}
+      <div className="card">
+        <h2><span className="num">5</span> 형식 · 스타일 · 그림자료</h2>
+        <div className="row">
+          <div>
+            <label className="fld">문항 형식</label>
+            <select value={format} onChange={e=>setFormat(e.target.value)}>
+              {FORMATS.map(f=><option key={f} value={f}>{f}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="fld">그림자료</label>
+            <select value={visual} onChange={e=>setVisual(e.target.value)}>
+              {VISUALS.map(v=><option key={v.v} value={v.v}>{v.t}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="fld">문항 수</label>
+            <input type="number" min="1" max="5" value={count}
+              onChange={e=>setCount(Math.max(1,Math.min(5,Number(e.target.value)||1)))} />
+          </div>
+        </div>
+        <div style={{marginTop:12}}>
+          <label className="fld">스타일 자유 지정</label>
+          <input type="text" value={style} onChange={e=>setStyle(e.target.value)}
+            placeholder='예: 실생활 맥락 강조, 그래프 해석 포함, 600자 분량' />
+        </div>
+      </div>
+
+      <button className="btn" onClick={generate} disabled={loading} style={{width:"100%",fontSize:16}}>
+        {loading ? <><span className="spin"></span>생성 중…</> : "문항 · 루브릭 생성"}
+      </button>
+
+      {error && <div className="err">⚠ {error}</div>}
+
+      {result && <Result r={result} showTeacher={showTeacher} setShowTeacher={setShowTeacher}
+                         copyMd={copyMd} copied={copied} />}
+
+      <p style={{textAlign:"center",color:"var(--muted)",fontSize:12,marginTop:40}}>
+        생성 결과는 출제 전 성취기준·성취수준·위계·자료 적합성을 한 번 더 검토하세요.
+      </p>
+    </div>
+  );
+}
+
+function Result({ r, showTeacher, setShowTeacher, copyMd, copied }) {
+  const ce = r.contentElements || {};
+  return (
+    <div style={{marginTop:24}}>
+      <div className="toolbar">
+        <span className={"badge "+(r.curriculum==="2015"?"b15":"b22")}>
+          {r.curriculum==="2015"?"2015 개정":"2022 개정"}
+        </span>
+        {r.standardCode && <span className="tag">{r.standardCode}</span>}
+        <span style={{flex:1}}></span>
+        <button className="btn sec" onClick={()=>setShowTeacher(!showTeacher)}>
+          {showTeacher?"교사용 숨기기 (학생 배부본)":"교사용 보기"}
+        </button>
+        <button className="btn sec" onClick={copyMd}>{copied?"복사됨 ✓":"Markdown 복사"}</button>
+      </div>
+
+      {r.standardText && <div className="card" style={{padding:14}}><b>성취기준</b><div style={{fontSize:14,marginTop:4}}>{r.standardText}</div></div>}
+      {r.standardNote && <div className="note">⚠ {r.standardNote}</div>}
+      {r.hierarchyBlock && <div className="note info">🧭 위계 점검: {r.hierarchyBlock}</div>}
+
+      {/* 내용요소 */}
+      <div className="card">
+        <h2>내용요소</h2>
+        <div className="elems">
+          <div className="e"><b>지식·이해</b><ul>{(ce.knowledge||[]).map((x,i)=><li key={i}>{x}</li>)}</ul></div>
+          <div className="e"><b>과정·기능</b><ul>{(ce.process||[]).map((x,i)=><li key={i}>{x}</li>)}</ul></div>
+          <div className="e"><b>가치·태도</b><ul>{(ce.value||[]).map((x,i)=><li key={i}>{x}</li>)}</ul></div>
+        </div>
+        {(r.evaluationElements||[]).length>0 &&
+          <div style={{marginTop:12}}>
+            <b style={{fontSize:13,color:"var(--accent)"}}>평가요소</b>
+            <div className="tags" style={{marginTop:6}}>
+              {(r.evaluationElements||[]).map((x,i)=><span key={i} className="tag fmt">{x}</span>)}
+            </div>
+          </div>}
+      </div>
+
+      {/* 제시문 */}
+      {r.passage &&
+        <div className="card">
+          <h2>제시문{r.passage.title?` — ${r.passage.title}`:""}</h2>
+          <div style={{whiteSpace:"pre-wrap",fontSize:14}}>{r.passage.body}</div>
+        </div>}
+
+      {/* 그림자료 */}
+      {r.visual && r.visual.svg &&
+        <div className="card">
+          <h2>그림자료</h2>
+          <div className="visual">
+            <div dangerouslySetInnerHTML={{__html:r.visual.svg}} />
+            {r.visual.caption && <div className="cap">{r.visual.caption}</div>}
+          </div>
+        </div>}
+
+      {/* 문항들 */}
+      {(r.items||[]).map((it,i)=>(
+        <div className="item" key={i}>
+          <h3>문항 {it.number||i+1}</h3>
+          <div className="tags">
+            <span className="tag fmt">{it.format}</span>
+            <span className="tag">반응지시어: {it.directive}</span>
+            <span className="tag lvl">타겟 {it.targetLevel}</span>
+            {(it.usesData||[]).map((d,j)=><span key={j} className="tag data">{d} 활용</span>)}
+          </div>
+          <div className="stem">{it.stem}</div>
+          {(it.conditions||[]).length>0 &&
+            <><b style={{fontSize:13}}>조건</b>
+            <ul className="cond">{(it.conditions||[]).map((c,j)=><li key={j}>{c}</li>)}</ul></>}
+
+          {showTeacher && <>
+            <div className="box blue">
+              <h4>수준 설계 해설</h4>
+              <div style={{fontSize:13}}>
+                <p style={{margin:"4px 0"}}><b>성취기준 내용요소</b> · {it.levelAnalysis?.standardElements}</p>
+                <p style={{margin:"4px 0"}}><b>해당 수준 내용요소</b> · {it.levelAnalysis?.levelElements}</p>
+                <p style={{margin:"4px 0"}}><b>수준 적합성</b> · {it.levelAnalysis?.rationale}</p>
+              </div>
+            </div>
+            <div className="box gold">
+              <h4>모범답안 (A수준)</h4>
+              <div style={{fontSize:14,whiteSpace:"pre-wrap"}}>{it.modelAnswer}</div>
+            </div>
+            <b style={{fontSize:13}}>채점기준표</b>
+            <table className="rub">
+              <tbody>
+                {(it.rubric||[]).map((rb,j)=>(
+                  <tr key={j}><th>{rb.level}</th><td>{rb.descriptor}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
