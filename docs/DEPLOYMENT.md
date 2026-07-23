@@ -6,8 +6,11 @@
 
 1. supabase.com에서 프로젝트 생성. Project URL과 anon key 확보.
 2. 마이그레이션 적용(순서 중요):
-   - SQL Editor에 `0001_init.sql` → `0002_functions.sql` → `0003_rls.sql` 순서로 실행, 또는
-   - CLI: `supabase link --project-ref <ref>` 후 `supabase db push`.
+   - SQL Editor에 `0001_init` → `0002_functions` → `0003_rls` → `0004_works` → `0005_storage`
+     순서로 실행, 또는 CLI: `supabase link --project-ref <ref>` 후 `supabase db push`.
+   - `0005_storage.sql`는 private 버킷 `posters`와 Storage 정책을 만든다. storage 스키마 소유
+     권한이 필요하므로 SQL Editor(postgres) 또는 `db push`로 실행하고, 이후 Storage → Buckets
+     에서 `posters`(private) 생성을 확인한다. (이 환경에서는 런타임 검증을 하지 못했다.)
 3. Authentication → Email 활성화. 운영에서는 "Confirm email"을 켠다.
    - 켜면 회원가입 후 인증 메일 확인이 필요하다(앱이 안내 문구 표시).
    - Redirect URL에 배포 도메인(`https://<app>/dashboard`)을 추가한다.

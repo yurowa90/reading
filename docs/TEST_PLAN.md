@@ -2,11 +2,12 @@
 
 ## 단위 테스트 (Vitest) — 구현됨
 
-`tests/unit/` — `npm run test`로 실행. 현재 3파일 23케이스 통과.
+`tests/unit/` — `npm run test`로 실행. 현재 4파일 31케이스 통과.
 
 - `validation.test.ts`: signUp/login/class/book/sentence Zod 스키마, 참여 코드 형식.
 - `tags.test.ts`: 태그 정규화(분리·중복·길이·개수 제한).
 - `roles.test.ts`: 역할 판정 유틸(`isTeacher`/`isStudent`), 기본 역할.
+- `work-validation.test.ts`: 서평 draft 스키마, 제출 완성도 검증(구조화/자유), 포스터 메타.
 
 ## 데이터베이스(RLS) 테스트 — 시나리오 정의됨
 
@@ -20,6 +21,14 @@
 - T5 담당 교사가 담당 학급 문장 카드 SELECT 가능
 - T6 참여 코드 중복 가입 방지(복합 PK)
 - T7 잘못된 참여 코드 → `invalid` (정보 미노출)
+
+Phase 2(works/storage) 시나리오:
+- W1 같은 학급 학생이 다른 학생의 **미승인(submitted)** 작품을 SELECT 불가
+- W2 같은 학급 학생이 `published` 작품은 SELECT 가능
+- W3 학생이 자기 작품 status 를 직접 `published` 로 UPDATE 불가(WITH CHECK 거부)
+- W4 담당 교사가 제출작을 `published`/`rejected` 로 전이 가능, 다른 학급 교사는 불가
+- W5 storage: 미승인 포스터 파일을 같은 학급 학생이 직접 SELECT/서명 URL 생성 불가
+- W6 storage: 업로드 경로의 첫 폴더(class_id) 학급 구성원만 INSERT 가능
 
 ### 로컬 실행 방법
 

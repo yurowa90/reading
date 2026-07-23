@@ -53,6 +53,48 @@ export interface Book {
   updated_at: string;
 }
 
+export type WorkKind = "review" | "poster";
+export type WorkMode = "structured" | "free";
+export type WorkStatus =
+  | "draft"
+  | "submitted"
+  | "approved"
+  | "published"
+  | "rejected"
+  | "hidden";
+
+/** 구조화 서평 7개 섹션. 모든 값은 선택적으로 저장하되 제출 시 필수 항목을 검증한다. */
+export interface ReviewSections {
+  one_line: string;
+  key_problem: string;
+  impressive_sentence: string;
+  author_judgment: string;
+  disagreement: string;
+  connection: string;
+  final_evaluation: string;
+}
+
+export interface Work {
+  id: string;
+  user_id: string;
+  class_id: string;
+  book_id: string;
+  kind: WorkKind;
+  mode: WorkMode | null;
+  title: string | null;
+  body: string | null;
+  sections: ReviewSections | null;
+  poster_path: string | null;
+  poster_thumb_path: string | null;
+  status: WorkStatus;
+  review_note: string | null;
+  reviewed_by: string | null;
+  submitted_at: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface SentenceCard {
   id: string;
   user_id: string;

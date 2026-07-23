@@ -62,6 +62,27 @@ export default async function ClassDetailPage({
             </p>
           </Card>
         </Link>
+        {isOwnerTeacher ? (
+          <Link href={`/classes/${classId}/pending`}>
+            <Card className="transition hover:border-brand">
+              <p className="font-semibold text-stone-800">검토 큐</p>
+              <p className="mt-1 text-sm text-stone-500">제출된 서평·포스터 게시 승인</p>
+            </Card>
+          </Link>
+        ) : (
+          <Link href={`/classes/${classId}/works`}>
+            <Card className="transition hover:border-brand">
+              <p className="font-semibold text-stone-800">내 작품</p>
+              <p className="mt-1 text-sm text-stone-500">서평 쓰기·북포스터 올리기</p>
+            </Card>
+          </Link>
+        )}
+        <Link href={`/classes/${classId}/gallery`}>
+          <Card className="transition hover:border-brand">
+            <p className="font-semibold text-stone-800">학급 갤러리</p>
+            <p className="mt-1 text-sm text-stone-500">게시된 작품 감상 (학급 내부)</p>
+          </Card>
+        </Link>
       </section>
 
       {isOwnerTeacher ? (

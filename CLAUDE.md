@@ -39,11 +39,11 @@ docs/             PRD, ARCHITECTURE, ROADMAP, DATA_MODEL, SECURITY, UX_FLOW, TES
 주의: 이 저장소에는 무관한 정적 앱(`index.html`, `README.essay-studio.md`)이 함께 있다.
 독서앱과 무관하므로 건드리지 않는다.
 
-## 주요 데이터 모델 (Phase 1)
+## 주요 데이터 모델 (Phase 1–2)
 
-`profiles`(id, display_name, role) · `classes`(name, teacher_id, join_code) ·
-`class_members`(class_id, user_id, member_role, status) · `books`(class_id, ...) ·
-`sentence_cards`(user_id, class_id, book_id, quote, reason, interpretation, ...).
+`profiles` · `classes`(join_code) · `class_members` · `books` ·
+`sentence_cards`(quote/reason/interpretation) ·
+`works`(kind review/poster, mode, status, sections jsonb, poster_path) + private bucket `posters`.
 상세는 `docs/DATA_MODEL.md`.
 
 ## 역할과 권한
@@ -81,12 +81,18 @@ npm run build
 
 ## 현재 개발 단계
 
-**Phase 1 완료.** 인증/프로필/학급/도서/문장카드 CRUD + RLS까지 구현.
-Phase 2 이후(서평·북포스터·갤러리·댓글·좋아요·별점·우수작·AI 챗봇)는 문서 설계만 존재.
+**Phase 2 완료.** Phase 1(인증/학급/도서/문장카드) + Phase 2(서평·북포스터·게시 승인·갤러리)까지 구현.
+- 서평: 구조화 7섹션 / 자유 모드, 임시저장·미리보기·수집문장 삽입.
+- 북포스터: 클라이언트 EXIF 제거·썸네일, private bucket 업로드, 서명 URL 조회.
+- 워크플로: draft→submitted→published/rejected, published→hidden. 교사 검토 큐.
+- 갤러리: 게시작만, 종류·도서·검색·무작위 필터, 별칭 표시.
+- 주의: Storage 런타임은 로컬 Supabase 미구성으로 미검증(코드/정책/절차만).
+
+Phase 3 이후(댓글·좋아요·별점·우수작·AI 챗봇)는 문서 설계만 존재.
 
 ## 절대 하면 안 되는 작업
 
-- Phase 2 이후 기능을 미리 구현하거나 작동하지 않는 버튼/빈 화면 만들기
+- Phase 3 이후 기능을 미리 구현하거나 작동하지 않는 버튼/빈 화면 만들기
 - RLS 비활성화로 오류 회피 · service role key 클라이언트 노출
 - 회원가입에서 교사 역할 선택 허용 · `any`로 타입 오류 우회
 - 공개 버킷에 학생 포스터 저장 · force push · 비밀키 커밋
@@ -94,5 +100,5 @@ Phase 2 이후(서평·북포스터·갤러리·댓글·좋아요·별점·우�
 
 ## 다음 단계 진행 방법
 
-`docs/ROADMAP.md`의 Phase 2 항목을 따른다. 새 테이블은 `supabase/migrations/`에
-번호를 이어 추가하고, 반드시 RLS 정책과 거부 테스트를 함께 작성한다.
+`docs/ROADMAP.md`의 Phase 3(댓글·좋아요·별점·상호평가) 항목을 따른다. 새 테이블은
+`supabase/migrations/`에 번호를 이어 추가하고, 반드시 RLS 정책과 거부 테스트를 함께 작성한다.

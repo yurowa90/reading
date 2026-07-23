@@ -64,11 +64,37 @@ Phase 2 이후 테이블은 여기 설계만 존재하며 코드/마이그레이
 | tags | text[] | 최대 8개 |
 | visibility | text | 기본 `private` (`private`/`class`) |
 
-## Phase 2 이후 (설계만, 미구현)
+## Phase 2 (구현됨) — `supabase/migrations/0004_works.sql`, `0005_storage.sql`
+
+### works (서평 + 북포스터)
+| 열 | 타입 | 비고 |
+| --- | --- | --- |
+| id | uuid PK | |
+| user_id / class_id / book_id | uuid | 작성자·학급·도서 |
+| kind | work_kind | `review` \| `poster` |
+| mode | work_mode NULL | 서평만 `structured`/`free`, 포스터는 null |
+| title | text NULL | |
+| body | text NULL | 자유 모드 본문 |
+| sections | jsonb NULL | 구조화 7섹션(one_line…final_evaluation) |
+| poster_path / poster_thumb_path | text NULL | private bucket 경로(개인정보 미포함) |
+| status | work_status | `draft`/`submitted`/`approved`/`published`/`rejected`/`hidden` |
+| review_note | text NULL | 교사 반려 사유 |
+| reviewed_by | uuid NULL | 검토 교사 |
+| submitted_at / published_at | timestamptz NULL | |
+
+- enum: `work_kind`, `work_mode`, `work_status`. `approved`는 향후 2단계 게시용 예약(현재 미사용).
+- 상태 워크플로: draft→submitted→published/rejected, rejected→submitted 재제출, published→hidden.
+- 제약: `kind='review'`면 mode 필수, `kind='poster'`면 mode null(`works_kind_mode_ck`).
+
+### Storage: `posters` (private bucket)
+- 경로 `{class_id}/{work_id}.webp`(+ `_thumb`). 학생 이름/학번/이메일 미포함.
+- 클라이언트 canvas 재인코딩으로 EXIF(위치정보) 제거 + webp 변환 + 썸네일 생성.
+- bucket 크기 제한 10MB, mime `webp/jpeg/png`. 조회는 서버 서명 URL로만.
+
+## Phase 3 이후 (설계만, 미구현)
 
 아래 테이블은 설계 참고용이다. 구현 시 반드시 RLS 정책과 거부 테스트를 동반한다.
 
-- **works**: 서평/작품. `id, user_id, class_id, book_id, kind('review'|'poster'), mode('structured'|'free'), title, body(jsonb 또는 text), status('draft'|'submitted'|'approved'|'published'|'rejected'|'hidden'), poster_path, published_at`.
 - **comments**: `id, work_id, user_id, parent_id NULL, body, hidden_at, created_at`. 신고/교사 숨김 지원.
 - **likes**: `work_id, user_id` 복합 PK(중복 방지). 자기 작품 좋아요 금지(트리거/정책).
 - **ratings**: `work_id, user_id` 복합 PK. `score int check(1..5)`. 자기 작품 금지.

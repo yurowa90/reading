@@ -20,6 +20,13 @@
 | `/classes/[classId]/sentences` | (app) | 문장 목록(학생: 내 것 / 교사: 학생 것) |
 | `/classes/[classId]/sentences/new` | (app) | 문장 작성 |
 | `/sentences/[sentenceId]/edit` | (app) | 문장 수정·삭제(본인) |
+| `/classes/[classId]/works` | (app) | 내 작품(서평·포스터) 목록·제출·삭제 |
+| `/classes/[classId]/works/reviews/new` | (app) | 서평 작성(구조화/자유) |
+| `/classes/[classId]/works/posters/new` | (app) | 북포스터 업로드 |
+| `/works/[workId]` | (app) | 작품 상세(본인/교사/게시 열람) |
+| `/works/[workId]/edit` | (app) | 서평 수정(본인, draft/rejected) |
+| `/classes/[classId]/pending` | (app) | 교사 검토 큐(승인/반려/숨김) |
+| `/classes/[classId]/gallery` | (app) | 학급 갤러리(게시작, 필터·검색·무작위) |
 | `/profile` | (app) | 프로필(별칭 수정) |
 
 ## 학생 흐름
@@ -34,7 +41,19 @@
 ```
 로그인(교사 계정) → 대시보드 → 학급 만들기 → 참여 코드 공유
    → 도서 등록 → 학급 상세에서 구성원/학생 문장 기록 확인
+   → 검토 큐에서 제출작 게시 승인/반려/숨김 → 갤러리 확인
 ```
+
+## 작품 흐름 (Phase 2)
+
+```
+학생: 서평 쓰기(임시저장·미리보기·수집문장 삽입) 또는 포스터 업로드
+   → 제출 → (교사 승인) → 학급 갤러리 게시 / (반려) → 사유 확인 후 수정·재제출
+교사: 검토 큐 → 게시 승인 → 갤러리 노출 / 필요 시 숨김
+```
+
+포스터 이미지는 private bucket에 저장되고, 조회는 서버 서명 URL로만 이뤄진다.
+업로드 시 EXIF(위치정보)는 클라이언트에서 제거되며, 얼굴·실명 노출 경고를 표시한다.
 
 ## 상태 처리 규칙
 

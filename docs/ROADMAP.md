@@ -17,13 +17,19 @@
 - **완료 기준**: `docs/PRD.md` 인수 조건 + 루트 프롬프트 §19 전 항목.
 - **위험**: 로컬 Supabase 없이는 RLS/E2E 자동화 불가 → 수동 절차 문서화.
 
-## Phase 2 — 서평·북포스터·갤러리
+## Phase 2 — 서평·북포스터·갤러리 ✅ 완료
 - **목표**: 작품 제출과 학급 내부 갤러리.
-- **구현**: 서평(구조화/자유 모드, draft→submitted→approved→published), 북포스터 업로드,
-  교사 게시 승인, 승인작 갤러리.
-- **DB**: `works` 테이블, Storage private bucket + RLS.
-- **테스트**: 상태 전이, 승인 전 비공개, 소유자 외 초안 접근 거부.
-- **위험**: 이미지 EXIF/개인정보, 파일 경로 노출.
+- **구현**: 서평(구조화 7섹션/자유 모드, 임시저장·미리보기·수집문장 삽입),
+  북포스터 업로드(클라이언트 EXIF 제거·썸네일·private bucket), 제출 워크플로
+  (draft→submitted→published/rejected, published→hidden), 교사 검토 큐(승인/반려/숨김),
+  학급 갤러리(종류·도서·검색·무작위 필터, 별칭 표시).
+- **파일**: `src/app/(app)/classes/[classId]/{works,gallery,pending}/**`,
+  `src/app/(app)/works/[workId]/**`, `src/actions/{works,posters}.ts`,
+  `src/features/works/**`, `src/components/works/**`.
+- **DB**: `0004_works.sql`(works + 상태 enum + RLS), `0005_storage.sql`(private bucket + storage RLS).
+- **테스트**: 서평 제출 완성도 검증 단위 테스트, 상태 전이·가시성 RLS 시나리오(문서).
+- **미검증**: Storage 런타임은 로컬 Supabase 미구성으로 실행하지 못함(코드/정책/절차만 제공).
+- **위험**: 이미지 EXIF/개인정보(→ canvas 재인코딩으로 제거), 파일 경로 노출(→ uuid 경로).
 
 ## Phase 3 — 상호 피드백
 - **구현**: 댓글/답글/수정/삭제/신고/교사 숨김, 좋아요(중복 방지), 별점(1–5), 평가 기간.

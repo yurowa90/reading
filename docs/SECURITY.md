@@ -61,11 +61,29 @@ RLS 정책이 같은 테이블을 다시 조회하면 무한 재귀가 발생한
 - 다른 학급 교사는 이 학급 자료에 접근할 수 없다.
 - 학생은 다른 사용자를 학급에 추가하거나 역할을 바꿀 수 없다(INSERT/역할 UPDATE 정책 없음).
 
-## 파일 저장소 (Phase 2, 설계)
+## works RLS (Phase 2) — `0004_works.sql`
 
-- 북포스터는 **private bucket** + Storage RLS. 공개 버킷 금지.
-- 파일 경로에 학생 이름·학번·이메일을 포함하지 않는다(임의 파일명).
-- 업로드 시 EXIF 위치정보 제거, 얼굴·실명 노출 경고.
+| 동작 | 규칙 |
+| --- | --- |
+| SELECT | 본인(모든 상태) 또는 담당 교사(모든 상태) 또는 같은 학급 구성원(`published`만) |
+| INSERT | `user_id=auth.uid()` + 학급 구성원 + `status='draft'` 로만 시작 |
+| UPDATE(작성자) | `draft`/`rejected`에서만 편집, 상태를 `draft`/`submitted`/`rejected`로만 변경(승인·게시·숨김 불가) |
+| UPDATE(교사) | 담당 교사만 상태 전이(승인/반려/숨김). 내용 열은 서버 액션에서만 변경 |
+| DELETE(작성자) | `draft`/`rejected`에서만 |
+
+- 미승인 작품은 같은 학급 학생에게 보이지 않는다(게시 전 비공개).
+- 학생은 스스로 자기 작품을 `published`로 만들 수 없다(RLS WITH CHECK로 상태값 제한).
+
+## 파일 저장소 (Phase 2) — `0005_storage.sql`
+
+- 북포스터는 **private bucket `posters`** + Storage RLS. 공개 버킷 금지.
+- 경로 `{class_id}/{work_id}.webp` — 학생 이름·학번·이메일 미포함(uuid만).
+- 클라이언트가 canvas 재인코딩으로 EXIF(위치정보) 제거 후 webp만 업로드. 얼굴·실명 노출 경고 표시.
+- Storage SELECT 정책은 **works 가시성 규칙에 연결**된다(본인/담당 교사/게시된 작품을 보는 구성원).
+  → 미승인 포스터 파일도 같은 학급 학생이 직접 URL로 열 수 없다.
+- 조회는 서버가 생성하는 **단기 서명 URL**로만 노출한다.
+- 버킷 크기 제한 10MB, mime `webp/jpeg/png`로 Storage가 서버측 강제.
+- **미검증**: 로컬 Supabase 미구성으로 Storage 정책 런타임은 실행하지 못했다(절차만 문서화).
 
 ## AI (Phase 5, 설계)
 
