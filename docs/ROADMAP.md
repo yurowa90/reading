@@ -31,10 +31,18 @@
 - **미검증**: Storage 런타임은 로컬 Supabase 미구성으로 실행하지 못함(코드/정책/절차만 제공).
 - **위험**: 이미지 EXIF/개인정보(→ canvas 재인코딩으로 제거), 파일 경로 노출(→ uuid 경로).
 
-## Phase 3 — 상호 피드백
-- **구현**: 댓글/답글/수정/삭제/신고/교사 숨김, 좋아요(중복 방지), 별점(1–5), 평가 기간.
-- **DB**: `comments`, `likes`(unique), `ratings`(check+unique), `reports`, `voting_rounds`.
-- **테스트**: 자기 작품 좋아요/별점 금지, 중복 차단(제약조건), 연속 등록 제한.
+## Phase 3 — 상호 피드백 ✅ 완료
+- **구현**: 댓글/답글/수정/삭제, 입력 기본 틀, 신고, 교사 숨김, 좋아요(토글·중복 방지),
+  별점(1–5·수정 가능), 상호평가 기간(교사 설정·즉시 종료), 평가 기간 중 집계 비공개.
+- **파일**: `src/actions/{engagement,comments,voting}.ts`, `src/features/{engagement,comments}/**`,
+  `src/components/{engagement,comments,voting}/**`, `src/app/(app)/classes/[classId]/{voting,reports}/**`,
+  작품 상세(`works/[workId]`)에 좋아요·별점·댓글 통합.
+- **DB**: `0006_engagement.sql` — `comments`, `likes`(복합 PK), `ratings`(check+복합 PK),
+  `reports`(unique), `voting_rounds` + 공정성 헬퍼(자기작품 금지·평가기간·결과공개) + RLS + 레이트리밋 트리거.
+- **공정성**: 자기 작품 좋아요/별점 금지(RLS), 중복 차단(복합 PK), 연속 등록 5초 제한(트리거),
+  평가 기간 중 타인 집계 RLS 차단, 평균은 최소 평가 수(3) 이상일 때만 공개.
+- **테스트**: 댓글·별점·평가기간 검증 단위 테스트, RLS 거부 시나리오(문서).
+- **미검증**: RLS/트리거 런타임은 로컬 Supabase 미구성으로 실행하지 못함(정책·절차만).
 
 ## Phase 4 — 우수작 후보
 - **구현**: 베이지안 보정 별점 + 정규화 좋아요 → 후보 점수, 상위 20% 후보 표시,

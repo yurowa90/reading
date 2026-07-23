@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { PageHeader, Card, LinkButton, Alert, Badge } from "@/components/ui";
+import { PageHeader, Card, LinkButton, Badge } from "@/components/ui";
 import { WorkView } from "@/components/works/work-view";
 import { SubmitWorkButton, DeleteWorkButton } from "@/components/works/owner-actions";
 import { TeacherReviewActions } from "@/components/works/teacher-review-actions";
+import { LikeButton } from "@/components/engagement/like-button";
+import { RatingStars } from "@/components/engagement/rating-stars";
+import { CommentThread } from "@/components/comments/comment-thread";
 import { requireProfile } from "@/lib/auth/session";
 import { getWork } from "@/features/works/queries";
 import { getClass } from "@/features/classes/queries";
 import { getSignedPosterUrl } from "@/features/works/posters";
+import { getEngagement } from "@/features/engagement/queries";
+import { getComments } from "@/features/comments/queries";
 import { statusLabel, isEditableByOwner } from "@/lib/works/status";
 
 export const metadata: Metadata = { title: "작품" };
@@ -29,6 +34,12 @@ export default async function WorkDetailPage({
   const isTeacher = klass?.teacher_id === userId;
 
   const posterUrl = work.kind === "poster" ? await getSignedPosterUrl(work.poster_path) : null;
+
+  const isPublished = work.status === "published";
+  const [engagement, comments] = isPublished
+    ? await Promise.all([getEngagement(work.id, work.class_id), getComments(work.id)])
+    : [null, []];
+  const canRate = Boolean(engagement?.votingOpen) && !isOwner;
 
   return (
     <div className="space-y-4">
@@ -77,8 +88,43 @@ export default async function WorkDetailPage({
         </Card>
       ) : null}
 
-      {work.status === "published" && !isOwner && !isTeacher ? (
-        <Alert tone="success">학급 갤러리에 게시된 작품입니다.</Alert>
+      {isPublished && engagement ? (
+        <Card>
+          <div className="flex flex-wrap items-start gap-6">
+            <LikeButton
+              workId={work.id}
+              initialLiked={engagement.myLiked}
+              count={engagement.likeCount}
+              revealed={engagement.revealed}
+              canRate={canRate}
+            />
+            <RatingStars
+              workId={work.id}
+              myRating={engagement.myRating}
+              avg={engagement.ratingAvg}
+              ratingCount={engagement.ratingCount}
+              revealed={engagement.revealed}
+              canRate={canRate}
+            />
+          </div>
+          {isOwner ? (
+            <p className="mt-2 text-xs text-stone-400">본인 작품에는 좋아요·별점을 줄 수 없습니다.</p>
+          ) : !engagement.votingOpen ? (
+            <p className="mt-2 text-xs text-stone-400">
+              평가 기간이 아닙니다. 좋아요·별점은 교사가 설정한 평가 기간에만 가능합니다.
+            </p>
+          ) : null}
+        </Card>
+      ) : null}
+
+      {isPublished ? (
+        <CommentThread
+          workId={work.id}
+          comments={comments}
+          meId={userId}
+          isTeacher={Boolean(isTeacher)}
+          canComment={true}
+        />
       ) : null}
     </div>
   );

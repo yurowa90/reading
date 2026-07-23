@@ -91,14 +91,24 @@ Phase 2 이후 테이블은 여기 설계만 존재하며 코드/마이그레이
 - 클라이언트 canvas 재인코딩으로 EXIF(위치정보) 제거 + webp 변환 + 썸네일 생성.
 - bucket 크기 제한 10MB, mime `webp/jpeg/png`. 조회는 서버 서명 URL로만.
 
-## Phase 3 이후 (설계만, 미구현)
+## Phase 3 (구현됨) — `supabase/migrations/0006_engagement.sql`
+
+- **voting_rounds**: `id, class_id, label?, opens_at, closes_at, min_reviews_per_student, ts`.
+  기간 중복 검사(`closes_at > opens_at`). 담당 교사만 관리.
+- **comments**: `id, work_id, user_id, parent_id?(자기참조), body(1–1000), hidden_at?, hidden_by?, ts`.
+  게시작을 보는 구성원만 열람/작성. 숨김 댓글은 교사/작성자만. 연속 등록 5초 제한(트리거).
+- **likes**: `work_id, user_id` 복합 PK(중복 방지). INSERT는 `can_rate_work`(게시·구성원·비본인·기간열림).
+- **ratings**: `work_id, user_id` 복합 PK. `score smallint check(1..5)`, 수정 가능. 자기 작품 금지.
+- **reports**: `id, comment_id, reporter_id, reason?, status('open'|'resolved')`, `(comment_id,reporter_id)` unique.
+
+공정성 헬퍼(SECURITY DEFINER): `is_voting_open`, `results_revealed`, `can_rate_work`,
+`can_engage_published`, `can_report_comment`, `is_work_class_teacher`. 평가 기간 중에는
+likes/ratings SELECT가 본인·교사 외에는 RLS로 차단되어 집계가 비공개된다.
+
+## Phase 4 이후 (설계만, 미구현)
 
 아래 테이블은 설계 참고용이다. 구현 시 반드시 RLS 정책과 거부 테스트를 동반한다.
 
-- **comments**: `id, work_id, user_id, parent_id NULL, body, hidden_at, created_at`. 신고/교사 숨김 지원.
-- **likes**: `work_id, user_id` 복합 PK(중복 방지). 자기 작품 좋아요 금지(트리거/정책).
-- **ratings**: `work_id, user_id` 복합 PK. `score int check(1..5)`. 자기 작품 금지.
-- **voting_rounds**: `id, class_id, opens_at, closes_at, min_reviews_per_student, m_prior int default 5, reveal_after_close bool`.
 - **teacher_rubric_scores**: `id, work_id, teacher_id, criteria jsonb, total, comment`.
 - **chat_sessions**: `id, user_id, book_id, stage, created_at`.
 - **chat_messages**: `id, session_id, role('assistant'|'user'), stage, content, structured jsonb`.

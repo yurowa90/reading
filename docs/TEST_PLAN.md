@@ -2,12 +2,13 @@
 
 ## 단위 테스트 (Vitest) — 구현됨
 
-`tests/unit/` — `npm run test`로 실행. 현재 4파일 31케이스 통과.
+`tests/unit/` — `npm run test`로 실행. 현재 5파일 39케이스 통과.
 
 - `validation.test.ts`: signUp/login/class/book/sentence Zod 스키마, 참여 코드 형식.
 - `tags.test.ts`: 태그 정규화(분리·중복·길이·개수 제한).
 - `roles.test.ts`: 역할 판정 유틸(`isTeacher`/`isStudent`), 기본 역할.
 - `work-validation.test.ts`: 서평 draft 스키마, 제출 완성도 검증(구조화/자유), 포스터 메타.
+- `engagement-validation.test.ts`: 댓글/별점/신고/평가기간 스키마.
 
 ## 데이터베이스(RLS) 테스트 — 시나리오 정의됨
 
@@ -29,6 +30,15 @@ Phase 2(works/storage) 시나리오:
 - W4 담당 교사가 제출작을 `published`/`rejected` 로 전이 가능, 다른 학급 교사는 불가
 - W5 storage: 미승인 포스터 파일을 같은 학급 학생이 직접 SELECT/서명 URL 생성 불가
 - W6 storage: 업로드 경로의 첫 폴더(class_id) 학급 구성원만 INSERT 가능
+
+Phase 3(피드백) 시나리오:
+- E1 자기 작품에 좋아요/별점 INSERT 불가(`can_rate_work` 거부)
+- E2 같은 작품 중복 좋아요/별점 불가(복합 PK)
+- E3 평가 기간이 아닐 때 좋아요/별점 INSERT 불가
+- E4 평가 기간 중 타인의 likes/ratings SELECT 불가(집계 비공개), 교사는 가능
+- E5 5초 내 연속 댓글 등록 시 트리거가 거부
+- E6 숨김 처리된 댓글은 교사/작성자 외에는 SELECT 불가
+- E7 담당 교사만 voting_rounds 생성/수정, reports 처리 가능
 
 ### 로컬 실행 방법
 

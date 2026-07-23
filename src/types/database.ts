@@ -95,6 +95,48 @@ export interface Work {
   updated_at: string;
 }
 
+export interface VotingRound {
+  id: string;
+  class_id: string;
+  label: string | null;
+  opens_at: string;
+  closes_at: string;
+  min_reviews_per_student: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Comment {
+  id: string;
+  work_id: string;
+  user_id: string;
+  parent_id: string | null;
+  body: string;
+  hidden_at: string | null;
+  hidden_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Rating {
+  work_id: string;
+  user_id: string;
+  score: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ReportStatus = "open" | "resolved";
+
+export interface Report {
+  id: string;
+  comment_id: string;
+  reporter_id: string;
+  reason: string | null;
+  status: ReportStatus;
+  created_at: string;
+}
+
 export interface SentenceCard {
   id: string;
   user_id: string;
