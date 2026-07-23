@@ -56,11 +56,18 @@
 - **공정성**: "우수작"이 아니라 "동료평가 기반 우수작 후보"로 표시, 자동 확정하지 않고 교사가 최종 선정.
 - **미검증**: 집계/루브릭 RLS 런타임은 로컬 Supabase 미구성으로 미실행(정책·절차만).
 
-## Phase 5 — 독서 산파법 챗봇
+## Phase 5 — 독서 산파법 챗봇 ✅ 완료
 - **구현**: OBSERVE→INTERPRET→EVIDENCE→COUNTERARGUMENT→CONNECT→ORGANIZE→COMPLETE,
-  한 번에 질문 하나, 답변 기록, 대필 차단, Zod 응답 검증, adapter 구조.
-- **DB**: `chat_sessions`, `chat_messages`.
-- **테스트**: 대필 요청 거절, 단계 진행 조건, 개인정보 미전송.
+  한 번에 질문 하나(구조화 응답), 학생 답변이 있어야 다음 단계 진행, 대필 차단,
+  Zod 응답 검증, 제공자 교체 adapter, **Google Gemini** 연동(서버 env 키) + mock 폴백.
+- **파일**: `src/lib/ai/**`(types·prompt·provider·gemini·mock·config), `src/actions/chat.ts`,
+  `src/features/chat/queries.ts`, `src/components/chat/**`,
+  `src/app/(app)/classes/[classId]/chat/**`, `src/app/(app)/chat/[sessionId]/**`.
+- **DB**: `0008_chat.sql` — `chat_sessions`, `chat_messages`, socratic_stage enum + RLS.
+- **안전장치**: 키는 서버 env(`AI_API_KEY`)만, 학생 식별정보 미전송(책 제목·답변·수집문장만),
+  단계 진행은 서버가 고정 순서로 강제(모델 값 무시), 응답 스키마 위반 시 mock 폴백.
+- **테스트**: 단계 진행·응답 스키마·mock 생성 단위 테스트(실제 검증).
+- **미검증**: 실제 Gemini 호출은 키가 있어야 동작(이 환경엔 키 없음 → mock으로 동작/검증).
 
 ## Phase 6 — 포트폴리오·운영
 - **구현**: 학생 포트폴리오, 교사 대시보드/통계, 내보내기, 접근성 점검, 성능 최적화, 배포.

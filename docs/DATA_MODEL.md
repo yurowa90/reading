@@ -112,13 +112,20 @@ likes/ratings SELECT가 본인·교사 외에는 RLS로 차단되어 집계가 �
 - **works.featured_at / featured_by**: 최종 우수작 선정 표시(담당 교사만 설정).
 - 후보 점수는 `src/lib/ranking/candidates.ts`에서 계산(테이블 저장 없이 조회 시 계산).
 
-## Phase 5 이후 (설계만, 미구현)
+## Phase 5 (구현됨) — `supabase/migrations/0008_chat.sql`
+
+- **chat_sessions**: `id, user_id, class_id, book_id, stage(socratic_stage), status('active'|'completed'), ts`.
+  본인만 CRUD, 담당 교사는 열람만.
+- **chat_messages**: `id, session_id, role(chat_role), stage, content(1–4000), structured jsonb, created_at`.
+  assistant 메시지는 `{stage, question, hint?, nextStage}` 구조를 `structured`에 저장.
+- enum: `socratic_stage`(OBSERVE…COMPLETE), `chat_role`(assistant|user).
+- AI 연동은 `src/lib/ai/`(Gemini adapter + mock). 학생 식별정보는 저장/전송하지 않는다.
+
+## Phase 6 이후 (설계만, 미구현)
 
 아래 테이블은 설계 참고용이다. 구현 시 반드시 RLS 정책과 거부 테스트를 동반한다.
-- **chat_sessions**: `id, user_id, book_id, stage, created_at`.
-- **chat_messages**: `id, session_id, role('assistant'|'user'), stage, content, structured jsonb`.
-- **reports**: `id, comment_id, reporter_id, reason, status, created_at`.
-- **notifications**: `id, user_id, type, payload jsonb, read_at, created_at`.
+- **notifications**: `id, user_id, type, payload jsonb, read_at, created_at`. (Phase 6)
+- 포트폴리오/통계는 기존 테이블을 조회·집계하며, 필요 시 뷰(view)로 구성.
 
 ### 우수작 후보 점수 (Phase 4, 계산식만 설계)
 

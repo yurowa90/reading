@@ -39,11 +39,20 @@
 브라우저 → 서버 액션이 서명 URL 발급 → private bucket 업로드 → 경로만 DB 저장.
 경로에 개인정보 미포함, EXIF 제거, 교사 게시 승인 후에만 갤러리 노출.
 
-## AI 기능 연결 구조 (Phase 5, 설계)
+## AI 기능 연결 구조 (Phase 5, 구현됨)
 
-`lib/ai/` adapter 인터페이스(예: `generateSocraticQuestion(input): Promise<StageResult>`).
-서버에서만 호출, 키는 서버 환경 변수. 응답은 Zod 스키마로 검증. 제공자 교체 가능.
-학생 식별정보는 전송하지 않는다.
+`lib/ai/`가 제공자 교체용 adapter다.
+
+- `provider.ts`: `generateSocraticQuestion(input)` — 서버 전용(`import "server-only"`).
+  키가 있으면 Gemini, 없거나 실패하면 mock으로 폴백해 항상 유효한 질문 하나를 반환.
+- `gemini.ts`: Google Generative Language API 호출. 응답을 `socraticResponseSchema`(Zod)로 검증하고,
+  **단계 진행은 서버가 고정 순서로 강제**(모델의 stage/nextStage를 신뢰하지 않음).
+- `mock.ts`: 결정적 폴백(대필하지 않는 단계별 질문).
+- `config.ts`: `AI_PROVIDER`/`AI_API_KEY`/`AI_MODEL`을 서버 env에서만 읽는다.
+
+호출 흐름: 학생이 답변 제출(서버 액션) → 답변을 `chat_messages`에 기록 → 다음 단계 입력 구성
+(책 제목·저자·수집 문장·최근 대화; **학생 식별정보 제외**) → provider 호출 → 질문을 기록.
+학생이 답하지 않으면 다음 질문을 생성하지 않는다. AI는 완성 서평을 반환하지 않는다.
 
 ## 에러 처리
 

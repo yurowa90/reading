@@ -14,6 +14,7 @@
    - `0006_engagement.sql`(Phase 3): 댓글/좋아요/별점/상호평가 기간/신고 테이블과 RLS,
      공정성 헬퍼, 연속 등록 제한 트리거를 만든다.
    - `0007_rubric.sql`(Phase 4): 교사 루브릭 테이블(교사 전용 RLS)과 works 우수작 선정 컬럼을 만든다.
+   - `0008_chat.sql`(Phase 5): 산파법 챗봇 세션/메시지 테이블과 RLS를 만든다.
 3. Authentication → Email 활성화. 운영에서는 "Confirm email"을 켠다.
    - 켜면 회원가입 후 인증 메일 확인이 필요하다(앱이 안내 문구 표시).
    - Redirect URL에 배포 도메인(`https://<app>/dashboard`)을 추가한다.
@@ -40,6 +41,14 @@
    NEXT_PUBLIC_SUPABASE_ANON_KEY=...
    ```
    > 이 세 값은 공개 가능(anon key는 RLS로 통제). service role key는 넣지 않는다.
+
+   AI 챗봇(Phase 5)을 실제 Gemini로 쓰려면 **서버 전용** 변수를 추가한다(브라우저 노출 금지):
+   ```
+   AI_PROVIDER=gemini
+   AI_API_KEY=<Google Gemini API 키>
+   AI_MODEL=gemini-2.0-flash   # 선택
+   ```
+   Vercel에서는 이 값을 "Sensitive/Server" 환경 변수로 등록한다. 키가 없으면 mock으로 동작한다.
 3. 배포 후 `NEXT_PUBLIC_APP_URL`과 Supabase Auth Redirect URL이 일치하는지 확인.
 
 ## 4. 배포 후 점검

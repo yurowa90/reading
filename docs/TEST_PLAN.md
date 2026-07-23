@@ -10,6 +10,7 @@
 - `work-validation.test.ts`: 서평 draft 스키마, 제출 완성도 검증(구조화/자유), 포스터 메타.
 - `engagement-validation.test.ts`: 댓글/별점/신고/평가기간 스키마.
 - `candidates.test.ts`: 베이지안 보정·좋아요 정규화·후보 점수·상위20%·최소 평가 수 게이트(15케이스).
+- `ai-socratic.test.ts`: 단계 진행, 응답 스키마 검증(대필/빈응답 거부), mock 생성 정합성.
 
 ## 데이터베이스(RLS) 테스트 — 시나리오 정의됨
 
@@ -45,6 +46,13 @@ Phase 4(우수작) 시나리오:
 - C1 학생은 teacher_rubric_scores 를 SELECT/INSERT 불가(담당 교사만)
 - C2 담당 교사만 works.featured_at 설정 가능(최종 우수작 선정)
 - C3 후보 점수는 앱 계층 순수 함수로 계산되며 candidates.test.ts 로 검증됨
+
+Phase 5(챗봇) 시나리오:
+- S1 학생은 본인 chat_sessions/messages 만 CRUD, 다른 학생 대화 접근 불가
+- S2 담당 교사는 학급 학생 대화를 열람만(작성 불가)
+- S3 학생이 답하지 않으면 다음 질문이 생성되지 않는다(서버 액션 흐름)
+- S4 AI 응답 스키마 위반/호출 실패 시 mock 폴백(대화 계속)
+- S5 AI 호출 입력에 학생 이름·이메일·학번이 포함되지 않는다(buildInput 검토)
 
 ### 로컬 실행 방법
 

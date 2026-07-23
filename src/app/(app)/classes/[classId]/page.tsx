@@ -83,6 +83,14 @@ export default async function ClassDetailPage({
             <p className="mt-1 text-sm text-stone-500">게시된 작품 감상 (학급 내부)</p>
           </Card>
         </Link>
+        {!isOwnerTeacher ? (
+          <Link href={`/classes/${classId}/chat`}>
+            <Card className="transition hover:border-brand">
+              <p className="font-semibold text-stone-800">독서 산파법 대화</p>
+              <p className="mt-1 text-sm text-stone-500">AI와 질문을 주고받으며 생각 넓히기</p>
+            </Card>
+          </Link>
+        ) : null}
         {isOwnerTeacher ? (
           <>
             <Link href={`/classes/${classId}/voting`}>

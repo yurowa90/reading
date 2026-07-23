@@ -150,6 +150,45 @@ export interface Report {
   created_at: string;
 }
 
+export type SocraticStage =
+  | "OBSERVE"
+  | "INTERPRET"
+  | "EVIDENCE"
+  | "COUNTERARGUMENT"
+  | "CONNECT"
+  | "ORGANIZE"
+  | "COMPLETE";
+
+export type ChatRole = "assistant" | "user";
+
+export interface ChatSession {
+  id: string;
+  user_id: string;
+  class_id: string;
+  book_id: string;
+  stage: SocraticStage;
+  status: "active" | "completed";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SocraticResponse {
+  stage: SocraticStage;
+  question: string;
+  hint?: string;
+  nextStage: SocraticStage;
+}
+
+export interface ChatMessage {
+  id: string;
+  session_id: string;
+  role: ChatRole;
+  stage: SocraticStage;
+  content: string;
+  structured: SocraticResponse | null;
+  created_at: string;
+}
+
 export interface SentenceCard {
   id: string;
   user_id: string;
