@@ -61,6 +61,12 @@ export default async function WorkDetailPage({
         </div>
       )}
 
+      {work.featured_at ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">
+          ★ 교사가 선정한 우수작입니다.
+        </div>
+      ) : null}
+
       <WorkView work={work} posterUrl={posterUrl} authorName={isTeacher ? work.authorName : undefined} />
 
       {isOwner && isEditableByOwner(work.status) ? (

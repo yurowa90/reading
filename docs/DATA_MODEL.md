@@ -105,11 +105,16 @@ Phase 2 이후 테이블은 여기 설계만 존재하며 코드/마이그레이
 `can_engage_published`, `can_report_comment`, `is_work_class_teacher`. 평가 기간 중에는
 likes/ratings SELECT가 본인·교사 외에는 RLS로 차단되어 집계가 비공개된다.
 
-## Phase 4 이후 (설계만, 미구현)
+## Phase 4 (구현됨) — `supabase/migrations/0007_rubric.sql`
+
+- **teacher_rubric_scores**: `id, work_id, teacher_id, criteria jsonb(understanding/evidence/expression),
+  total(0–100), comment?`, `(work_id, teacher_id)` unique. 담당 교사만 CRUD(학생 비공개).
+- **works.featured_at / featured_by**: 최종 우수작 선정 표시(담당 교사만 설정).
+- 후보 점수는 `src/lib/ranking/candidates.ts`에서 계산(테이블 저장 없이 조회 시 계산).
+
+## Phase 5 이후 (설계만, 미구현)
 
 아래 테이블은 설계 참고용이다. 구현 시 반드시 RLS 정책과 거부 테스트를 동반한다.
-
-- **teacher_rubric_scores**: `id, work_id, teacher_id, criteria jsonb, total, comment`.
 - **chat_sessions**: `id, user_id, book_id, stage, created_at`.
 - **chat_messages**: `id, session_id, role('assistant'|'user'), stage, content, structured jsonb`.
 - **reports**: `id, comment_id, reporter_id, reason, status, created_at`.

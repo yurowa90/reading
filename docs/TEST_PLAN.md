@@ -9,6 +9,7 @@
 - `roles.test.ts`: 역할 판정 유틸(`isTeacher`/`isStudent`), 기본 역할.
 - `work-validation.test.ts`: 서평 draft 스키마, 제출 완성도 검증(구조화/자유), 포스터 메타.
 - `engagement-validation.test.ts`: 댓글/별점/신고/평가기간 스키마.
+- `candidates.test.ts`: 베이지안 보정·좋아요 정규화·후보 점수·상위20%·최소 평가 수 게이트(15케이스).
 
 ## 데이터베이스(RLS) 테스트 — 시나리오 정의됨
 
@@ -39,6 +40,11 @@ Phase 3(피드백) 시나리오:
 - E5 5초 내 연속 댓글 등록 시 트리거가 거부
 - E6 숨김 처리된 댓글은 교사/작성자 외에는 SELECT 불가
 - E7 담당 교사만 voting_rounds 생성/수정, reports 처리 가능
+
+Phase 4(우수작) 시나리오:
+- C1 학생은 teacher_rubric_scores 를 SELECT/INSERT 불가(담당 교사만)
+- C2 담당 교사만 works.featured_at 설정 가능(최종 우수작 선정)
+- C3 후보 점수는 앱 계층 순수 함수로 계산되며 candidates.test.ts 로 검증됨
 
 ### 로컬 실행 방법
 

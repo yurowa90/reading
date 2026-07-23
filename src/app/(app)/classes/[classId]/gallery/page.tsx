@@ -92,6 +92,11 @@ export default async function GalleryPage({
                 <Card className="h-full transition hover:border-brand">
                   <div className="mb-1 flex items-center gap-2">
                     <Badge>{work.kind === "review" ? "서평" : "북포스터"}</Badge>
+                    {work.featured_at ? (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                        ★ 우수작
+                      </span>
+                    ) : null}
                     <span className="text-xs text-stone-400">{work.authorName}</span>
                   </div>
                   {work.kind === "poster" ? (

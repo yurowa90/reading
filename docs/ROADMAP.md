@@ -44,11 +44,17 @@
 - **테스트**: 댓글·별점·평가기간 검증 단위 테스트, RLS 거부 시나리오(문서).
 - **미검증**: RLS/트리거 런타임은 로컬 Supabase 미구성으로 실행하지 못함(정책·절차만).
 
-## Phase 4 — 우수작 후보
-- **구현**: 베이지안 보정 별점 + 정규화 좋아요 → 후보 점수, 상위 20% 후보 표시,
-  결과 숨김, 무작위 노출, 교사 루브릭, 최종 선정.
-- **DB**: `teacher_rubric_scores`, 집계 뷰/함수.
-- **테스트**: 최소 평가 수 게이트, 공정성(자기 평가 금지), 점수 계산.
+## Phase 4 — 우수작 후보 ✅ 완료
+- **구현**: 베이지안 보정 별점 + 정규화 좋아요 → 동료평가 후보 점수(`0.7·정규화보정 + 0.3·정규화좋아요`),
+  최소 평가 수(3) 게이트, 상위 20% 후보 표시, 교사 루브릭(3항목·메모), 최종 우수작 선정(featured),
+  갤러리·작품 상세에 우수작 배지.
+- **파일**: `src/lib/ranking/candidates.ts`(순수 함수), `src/features/ranking/queries.ts`,
+  `src/actions/rubric.ts`, `src/components/ranking/candidate-actions.tsx`,
+  `src/app/(app)/classes/[classId]/candidates/**`.
+- **DB**: `0007_rubric.sql` — `teacher_rubric_scores`(교사 전용 RLS) + `works.featured_at/featured_by`.
+- **테스트**: 베이지안·정규화·후보 상위20%·최소 평가 수 게이트 단위 테스트 15케이스(실제 검증).
+- **공정성**: "우수작"이 아니라 "동료평가 기반 우수작 후보"로 표시, 자동 확정하지 않고 교사가 최종 선정.
+- **미검증**: 집계/루브릭 RLS 런타임은 로컬 Supabase 미구성으로 미실행(정책·절차만).
 
 ## Phase 5 — 독서 산파법 챗봇
 - **구현**: OBSERVE→INTERPRET→EVIDENCE→COUNTERARGUMENT→CONNECT→ORGANIZE→COMPLETE,

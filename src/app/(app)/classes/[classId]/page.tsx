@@ -97,6 +97,12 @@ export default async function ClassDetailPage({
                 <p className="mt-1 text-sm text-stone-500">신고된 댓글 검토·숨김</p>
               </Card>
             </Link>
+            <Link href={`/classes/${classId}/candidates`}>
+              <Card className="transition hover:border-brand">
+                <p className="font-semibold text-stone-800">우수작 후보</p>
+                <p className="mt-1 text-sm text-stone-500">동료평가 점수·루브릭·최종 선정</p>
+              </Card>
+            </Link>
           </>
         ) : null}
       </section>

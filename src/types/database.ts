@@ -91,6 +91,19 @@ export interface Work {
   reviewed_by: string | null;
   submitted_at: string | null;
   published_at: string | null;
+  featured_at: string | null;
+  featured_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TeacherRubricScore {
+  id: string;
+  work_id: string;
+  teacher_id: string;
+  criteria: Record<string, number>;
+  total: number;
+  comment: string | null;
   created_at: string;
   updated_at: string;
 }

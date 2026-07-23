@@ -13,6 +13,7 @@
      에서 `posters`(private) 생성을 확인한다. (이 환경에서는 런타임 검증을 하지 못했다.)
    - `0006_engagement.sql`(Phase 3): 댓글/좋아요/별점/상호평가 기간/신고 테이블과 RLS,
      공정성 헬퍼, 연속 등록 제한 트리거를 만든다.
+   - `0007_rubric.sql`(Phase 4): 교사 루브릭 테이블(교사 전용 RLS)과 works 우수작 선정 컬럼을 만든다.
 3. Authentication → Email 활성화. 운영에서는 "Confirm email"을 켠다.
    - 켜면 회원가입 후 인증 메일 확인이 필요하다(앱이 안내 문구 표시).
    - Redirect URL에 배포 도메인(`https://<app>/dashboard`)을 추가한다.

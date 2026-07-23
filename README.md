@@ -6,14 +6,15 @@
 > 이 저장소에는 이전의 무관한 정적 앱(`index.html`, `README.essay-studio.md`)이
 > 함께 들어 있습니다. 독서앱과는 별개이며 그대로 보존됩니다.
 
-## 현재 범위 (Phase 1–3)
+## 현재 범위 (Phase 1–4)
 
 - **Phase 1**: 인증 · 프로필 · 학급 생성/참여 · 도서 등록 · 문장 카드 CRUD · RLS.
 - **Phase 2**: 서평(구조화/자유) · 북포스터 업로드(private bucket) · 제출/게시 승인 워크플로 ·
   학급 갤러리(필터·검색·무작위).
 - **Phase 3**: 댓글/답글/신고/교사 숨김 · 좋아요 · 별점 · 상호평가 기간(기간 중 집계 비공개).
+- **Phase 4**: 동료평가 기반 우수작 후보(베이지안 보정+정규화) · 교사 루브릭 · 최종 우수작 선정.
 
-우수작 후보 점수 · 교사 루브릭 · AI 챗봇은 **아직 구현하지 않았고** `docs/`에 설계만 있습니다.
+독서 산파법 AI 챗봇, 포트폴리오·통계 대시보드는 **아직 구현하지 않았고** `docs/`에 설계만 있습니다.
 > Storage(포스터)와 RLS 정책은 실제 Supabase 없이 런타임 검증을 하지 못했습니다. 마이그레이션·버킷 설정 후 확인이 필요합니다.
 
 ## 기술 스택
@@ -52,6 +53,7 @@ npm run dev            # http://localhost:3000
    supabase/migrations/0004_works.sql     # Phase 2: 서평/포스터
    supabase/migrations/0005_storage.sql   # Phase 2: posters private bucket + 정책
    supabase/migrations/0006_engagement.sql # Phase 3: 댓글/좋아요/별점/평가기간/신고
+   supabase/migrations/0007_rubric.sql    # Phase 4: 교사 루브릭 + 우수작 선정
    ```
 
    `0005_storage.sql`는 private 버킷 `posters`와 Storage 정책을 만듭니다. 이미지 조회는
