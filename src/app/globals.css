@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f7f5f0;
+  --foreground: #23211c;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic",
+    sans-serif;
+  line-height: 1.6;
+}
+
+/* 키보드 포커스 가시성 확보(접근성) */
+:where(a, button, input, textarea, select):focus-visible {
+  outline: 2px solid #274c77;
+  outline-offset: 2px;
+}

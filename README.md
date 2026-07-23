@@ -1,78 +1,98 @@
-# 논술형 평가 문항 스튜디오
+# 책갈피 — 학급 독서교육 웹앱
 
-「2025 중등 논술형 평가 길라잡이」(경기도교육청) 방법론과 2022 개정 교육과정을 반영한,
-교사용 논술형 평가 문항 자동 제작 웹앱입니다.
+한국 고등학교 한 학급에서 시험 운영할 수 있는 독서교육 웹앱입니다.
+독서의 **결과물**보다 **과정과 사고의 변화**를 기록하도록 설계했습니다.
 
-빌드 도구·터미널 없이 동작하는 단일 파일(`index.html`)입니다. GitHub Pages에 올리면 바로 쓸 수 있고,
-파일을 더블클릭해 브라우저로 열어도 됩니다(인터넷 연결 필요 — React·Babel을 CDN에서 불러옵니다).
+> 이 저장소에는 이전의 무관한 정적 앱(`index.html`, `README.essay-studio.md`)이
+> 함께 들어 있습니다. 독서앱과는 별개이며 그대로 보존됩니다.
 
-## 실행 방식 두 가지
+## 현재 범위 (Phase 1)
 
-상단 **0 · 실행 방식**에서 골라 쓸 수 있습니다.
+인증 · 프로필 · 학급 생성/참여 · 도서 등록 · **문장 카드 CRUD** · Row Level Security.
+서평 · 북포스터 · 갤러리 · 댓글 · 좋아요 · 별점 · 우수작 · AI 챗봇은 **아직 구현하지 않았고**,
+`docs/`에 설계만 있습니다.
 
-1. **claude.ai 붙여넣기 (Pro·Max · API 불필요)** — 기본값.
-   앱이 입력 양식을 받아 완성된 프롬프트를 만들어 줍니다. 그것을 복사해 **claude.ai**(Claude
-   Pro/Max 구독)에 붙여넣고, Claude가 출력한 결과(JSON)를 다시 앱에 붙여넣으면 문항·루브릭·모범답안이
-   표 형태로 정리됩니다. **API 키가 필요 없습니다.**
-   - 참고: Claude Pro/Max 구독은 API 접근권이 아닙니다. 제3자 웹앱이 구독으로 Claude를 직접
-     호출할 수 있는 공식적 방법은 없으므로, 생성은 claude.ai에서 하고 앱은 프롬프트 작성·결과
-     정리를 맡는 이 방식이 구독을 활용하는 정당한 경로입니다.
-2. **Gemini API 자동 호출** — 본인 Gemini API 키를 넣으면 앱 안에서 바로 생성됩니다.
+## 기술 스택
 
-## 주요 기능
+Next.js 15 (App Router) · React 19 · TypeScript strict · Tailwind CSS · Zod ·
+React Hook Form · Supabase (PostgreSQL/Auth/RLS) · Vitest · Playwright.
 
-**입력·변환**
-- 성취기준 → 문항 생성 / 지필·학력평가 → 논술형 변환 / 논술형 → 변형 / 아이디어·주제로 만들기
-- 글·사진 동시 입력(사진 속 문항·자료·표·그림을 읽어 반영)
-- 문항 형식 선택(자료제시형·문제해결형·비교분석형·논증형·실험탐구형·자유서술형·자동)과 스타일 자유 지정
-- 그림자료(SVG 도식) 자동/항상/안 함 선택
+## 빠른 시작
 
-**교육과정 정합성**
-- 길라잡이 방법론(발문·자료·조건, 반응 지시어 17종, 평가요소 '~하기', 채점기준표 원칙)을 시스템 지침으로 내장
-- 2022 개정 과학과 성취기준 체계 반영, 2015 개정 혼용 자동 판별·안내 배지
-- 대상 과목 선택 시 위계 통제로 상위 학년·심화 개념 배제(선행학습 방지)
+사전 요구: Node.js 20+ (개발은 22에서 검증), npm, Supabase 프로젝트 1개.
 
-**평가 설계**
-- 문항별 모범답안(A수준), 자료–발문 연계 표기
-- 성취수준 A~E, 채점기준표 5단계
-- 문항 타겟 수준(최소능력자) 변별 설계 + 수준 설계 해설(내용요소 분석·적합성 근거)
+```bash
+# 1) 의존성 설치
+npm install
 
-**출력**
-- 교사용/학생 배부본 토글, Markdown 복사(HWP·워드 붙여넣기)
+# 2) 환경 변수 설정
+cp .env.example .env.local
+#   NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_APP_URL 채우기
 
-## 사용 방법
+# 3) 데이터베이스 마이그레이션 적용 (아래 'Supabase 설정' 참고)
 
-공통: 과목 → 타겟 수준 → 입력 방식 → 입력 내용(글·사진) → 형식·그림자료를 고릅니다.
+# 4) 개발 서버
+npm run dev            # http://localhost:3000
+```
 
-**A. claude.ai 붙여넣기 모드 (API 불필요)**
-1. **① claude.ai용 프롬프트 복사**를 누릅니다.
-2. [claude.ai](https://claude.ai)에 로그인(Pro/Max)해 새 대화에 붙여넣습니다.
-   사진을 넣었다면 그 대화에 이미지도 함께 첨부하세요.
-3. Claude가 출력한 결과 전체(중괄호 `{ }` 포함)를 복사합니다.
-4. 앱의 **② 붙여넣기** 칸에 넣고 **③ 결과 표시**를 누릅니다.
+## Supabase 설정
 
-**B. Gemini API 모드**
-1. **Gemini API 키 발급**: [aistudio.google.com](https://aistudio.google.com) → Get API key
-   (카드 등록 불필요). `AIza…`로 시작하는 키를 복사합니다.
-2. 앱 상단 **0 · 실행 방식 → Gemini API 자동 호출**을 고르고 키를 붙여넣습니다.
-   - 키는 본인 브라우저(localStorage)에만 저장되며 코드·서버로 전송되지 않습니다.
-   - 모델 기본값은 `gemini-2.5-flash`입니다. 더 정교하게는 `gemini-2.5-pro`로 바꾸세요.
-3. **문항 · 루브릭 생성**을 누릅니다.
+1. [supabase.com](https://supabase.com)에서 프로젝트를 만들고 URL·anon key를 `.env.local`에 넣습니다.
+2. 마이그레이션을 순서대로 적용합니다. SQL Editor에 붙여넣거나 Supabase CLI를 사용합니다.
 
-## GitHub Pages로 배포하기 (터미널 불필요)
+   ```bash
+   # SQL Editor 사용 시 아래 파일을 순서대로 실행
+   supabase/migrations/0001_init.sql
+   supabase/migrations/0002_functions.sql
+   supabase/migrations/0003_rls.sql
+   ```
 
-1. 이 저장소의 **Settings → Pages**로 이동합니다.
-2. **Source**를 `Deploy from a branch`로, 브랜치를 배포할 브랜치(예: `main`)와 `/ (root)`로 지정하고 저장합니다.
-3. 몇 분 뒤 `https://<사용자명>.github.io/<저장소명>/` 주소로 접속하면 됩니다.
+   또는 Supabase CLI:
 
-## 주의사항
+   ```bash
+   supabase link --project-ref <ref>
+   supabase db push        # migrations 폴더 적용
+   ```
 
-- **API 키는 절대 코드에 적거나 커밋하지 마세요.** 이 앱은 키를 코드에 저장하지 않고 실행 시 입력받습니다.
-- 공개 페이지로 배포해도 키는 코드에 없으므로, Gemini 모드 방문자는 각자 자기 키를 입력해야 동작합니다.
-- 생성 결과(성취수준 추정·위계·SVG 도식)는 LLM 특성상 편차가 있을 수 있으니 출제 전 한 번 검토하세요.
-- 성취수준 기술을 함께 입력할수록 수준 설계 해설의 정확도가 올라갑니다.
+3. **이메일 인증**: Authentication → Providers → Email. 로컬 시험 운영에서는
+   "Confirm email"을 끄면 가입 즉시 로그인됩니다(운영 시에는 켜기 권장).
+4. **최초 교사 계정 부여**: 회원가입 후 Table editor → `profiles`에서 해당 사용자의
+   `role`을 `teacher`로 변경합니다. (일반 사용자는 스스로 변경할 수 없습니다.)
 
-## 구조
+자세한 절차와 배포는 `docs/DEPLOYMENT.md`를 참고하세요.
 
-- `index.html` — 앱 전체(React + Babel standalone, 빌드 불필요). UI·교육과정 데이터·프롬프트 조립·
-  Gemini API 호출·결과 렌더링이 한 파일에 들어 있습니다.
+## 명령어
+
+| 명령 | 설명 |
+| --- | --- |
+| `npm run dev` | 개발 서버 |
+| `npm run build` | 프로덕션 빌드 |
+| `npm run start` | 프로덕션 실행 |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | 타입 검사 |
+| `npm run test` | 단위 테스트(Vitest) |
+| `npm run test:e2e` | E2E(Playwright, 로컬 Supabase 필요) |
+| `npm run format` / `format:check` | Prettier |
+
+## 문서
+
+- `docs/PRD.md` — 제품 요구사항
+- `docs/ARCHITECTURE.md` — 시스템 구조
+- `docs/ROADMAP.md` — 단계별 로드맵
+- `docs/DATA_MODEL.md` — 전체 데이터 모델
+- `docs/SECURITY.md` — 보안·RLS 정책
+- `docs/UX_FLOW.md` — 화면 흐름
+- `docs/TEST_PLAN.md` — 테스트 계획
+- `docs/DEPLOYMENT.md` — 배포 절차
+- `CLAUDE.md` — 개발 요약 가이드
+
+## 보안 요약
+
+- 모든 public 테이블에 RLS 활성화. 권한은 화면이 아니라 DB에서 통제합니다.
+- 신규 사용자는 항상 학생입니다. 교사 권한은 관리자만 부여합니다.
+- 학급 참여는 서버 RPC로만 처리하며 클라이언트가 학급 목록을 검색하지 않습니다.
+- service role key는 클라이언트에서 사용하지 않으며 Phase 1에서는 요구하지 않습니다.
+
+## 라이선스
+
+시험 운영용 내부 프로젝트.

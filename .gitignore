@@ -1,4 +1,22 @@
-# 의존성 / 빌드 산출물 (이 프로젝트는 빌드가 필요 없습니다)
+# 의존성 / 빌드 산출물
 node_modules/
+.next/
+out/
+build/
 .DS_Store
 *.log
+
+# 환경 변수 (실제 값은 절대 커밋하지 않는다)
+.env
+.env.local
+.env.*.local
+
+# 테스트 산출물
+coverage/
+test-results/
+playwright-report/
+.playwright/
+
+# 편집기
+.vscode/
+.idea/
