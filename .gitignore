@@ -20,3 +20,6 @@ playwright-report/
 # 편집기
 .vscode/
 .idea/
+
+# TypeScript incremental build info
+*.tsbuildinfo

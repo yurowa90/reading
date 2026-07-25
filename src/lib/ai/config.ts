@@ -17,7 +17,8 @@ export function getAiConfig(): AiConfig {
   return {
     provider,
     apiKey,
-    model: process.env.AI_MODEL ?? "gemini-2.0-flash",
+    // gemini-flash-latest 는 무료 등급에서 호출 가능하도록 유지되는 별칭 모델.
+    model: process.env.AI_MODEL ?? "gemini-flash-latest",
   };
 }
 
