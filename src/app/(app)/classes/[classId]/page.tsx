@@ -84,15 +84,29 @@ export default async function ClassDetailPage({
           </Card>
         </Link>
         {!isOwnerTeacher ? (
-          <Link href={`/classes/${classId}/chat`}>
-            <Card className="transition hover:border-brand">
-              <p className="font-semibold text-stone-800">독서 산파법 대화</p>
-              <p className="mt-1 text-sm text-stone-500">AI와 질문을 주고받으며 생각 넓히기</p>
-            </Card>
-          </Link>
+          <>
+            <Link href={`/classes/${classId}/chat`}>
+              <Card className="transition hover:border-brand">
+                <p className="font-semibold text-stone-800">독서 산파법 대화</p>
+                <p className="mt-1 text-sm text-stone-500">AI와 질문을 주고받으며 생각 넓히기</p>
+              </Card>
+            </Link>
+            <Link href={`/classes/${classId}/portfolio`}>
+              <Card className="transition hover:border-brand">
+                <p className="font-semibold text-stone-800">내 독서 포트폴리오</p>
+                <p className="mt-1 text-sm text-stone-500">내 문장·작품·대화 여정 (인쇄/PDF)</p>
+              </Card>
+            </Link>
+          </>
         ) : null}
         {isOwnerTeacher ? (
           <>
+            <Link href={`/classes/${classId}/dashboard`}>
+              <Card className="transition hover:border-brand">
+                <p className="font-semibold text-stone-800">학급 대시보드</p>
+                <p className="mt-1 text-sm text-stone-500">참여 통계·학생별 활동 (인쇄/PDF)</p>
+              </Card>
+            </Link>
             <Link href={`/classes/${classId}/voting`}>
               <Card className="transition hover:border-brand">
                 <p className="font-semibold text-stone-800">상호평가 기간</p>

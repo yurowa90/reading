@@ -32,6 +32,8 @@
 | `/classes/[classId]/candidates` | (app) | 교사 우수작 후보 보드·루브릭·최종 선정 |
 | `/classes/[classId]/chat` | (app) | 산파법 대화 목록·시작(학생) |
 | `/chat/[sessionId]` | (app) | 산파법 대화(학생 진행 / 교사 열람) |
+| `/classes/[classId]/portfolio` | (app) | 독서 포트폴리오(본인/교사 열람, 인쇄·PDF) |
+| `/classes/[classId]/dashboard` | (app) | 교사 학급 대시보드(통계·학생별 활동) |
 | `/profile` | (app) | 프로필(별칭 수정) |
 
 작품 상세(`/works/[workId]`)에는 게시작에 한해 좋아요·별점·댓글(답글/신고)이 함께 표시된다.

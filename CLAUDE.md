@@ -95,7 +95,8 @@ npm run build
   키는 서버 env `AI_API_KEY`만, 학생 식별정보 미전송(`lib/ai/`, `docs/SECURITY.md`).
 - 주의: Storage·RLS·실제 Gemini 호출 런타임은 로컬 Supabase/키 미구성으로 미검증(코드/정책/절차만).
 
-Phase 6(포트폴리오·대시보드·통계·내보내기)는 문서 설계만 존재.
+Phase 6 진행 중: 학생 포트폴리오·교사 대시보드/통계·인쇄(PDF) 내보내기 구현.
+남은 항목(알림·접근성 자동점검·성능 측정·PDF 서버 렌더·배포 리허설)은 `docs/ROADMAP.md` 참조.
 
 ## 절대 하면 안 되는 작업
 

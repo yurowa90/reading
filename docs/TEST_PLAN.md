@@ -11,6 +11,7 @@
 - `engagement-validation.test.ts`: 댓글/별점/신고/평가기간 스키마.
 - `candidates.test.ts`: 베이지안 보정·좋아요 정규화·후보 점수·상위20%·최소 평가 수 게이트(15케이스).
 - `ai-socratic.test.ts`: 단계 진행, 응답 스키마 검증(대필/빈응답 거부), mock 생성 정합성.
+- `stats-summary.test.ts`: 상태·종류별 집계, 사용자별 tally, 학생별 참여 결합(포트폴리오/대시보드).
 
 ## 데이터베이스(RLS) 테스트 — 시나리오 정의됨
 

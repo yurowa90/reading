@@ -25,3 +25,19 @@ body {
   outline: 2px solid #274c77;
   outline-offset: 2px;
 }
+
+/* 인쇄/PDF 내보내기: 내비게이션·조작 버튼 숨김 */
+@media print {
+  body {
+    background: #fff;
+  }
+  header,
+  .no-print {
+    display: none !important;
+  }
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+}
+
