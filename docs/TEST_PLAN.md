@@ -13,10 +13,21 @@
 - `ai-socratic.test.ts`: 단계 진행, 응답 스키마 검증(대필/빈응답 거부), mock 생성 정합성.
 - `stats-summary.test.ts`: 상태·종류별 집계, 사용자별 tally, 학생별 참여 결합(포트폴리오/대시보드).
 
-## 데이터베이스(RLS) 테스트 — 시나리오 정의됨
+## 데이터베이스(RLS) 테스트 — 로컬 Postgres에서 실행·통과 ✅
 
-`supabase/tests/rls_test.sql`에 거부/허용 시나리오를 정의했다. 로컬 Supabase가 있어야
-자동 실행할 수 있어, 이번 릴리스에서는 **실행하지 못했다**(환경 미구성). 검증 항목:
+`supabase/tests/validate_local.sh` 가 로컬 Postgres에 Supabase 스키마(auth/storage/역할)를
+`prelude_stub.sql` 로 흉내낸 뒤 마이그레이션 0001~0008 을 적용하고 핵심 RLS 시나리오를 검증한다.
+
+```bash
+bash supabase/tests/validate_local.sh   # PostgreSQL 14+ 필요, 슈퍼유저(root)로 실행 금지
+```
+
+실행 결과(통과 확인): 마이그레이션 8개 전부 적용, 참여코드 생성/교사 자동 구성원,
+문장카드 격리(타 학생 열람/수정 불가·교사 열람), 역할 상승 차단, 학생 자기게시 차단,
+자기작품 좋아요/별점 차단, 평가기간 중 집계 비공개(소유자/타학생)·교사 열람, 연속 댓글 제한,
+숨김 댓글 가시성 — RLS 활성 14테이블·정책 53개.
+
+아래는 원래 정의한 시나리오 목록이며, 위 스크립트가 대부분을 자동 검증한다:
 
 - T1 학생이 다른 학생 문장 카드 SELECT 불가
 - T2 학생이 다른 학생 문장 카드 UPDATE 불가

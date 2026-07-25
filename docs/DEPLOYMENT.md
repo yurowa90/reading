@@ -1,6 +1,20 @@
 # DEPLOYMENT.md — 배포 절차
 
-대상: **Vercel**(앱) + **Supabase Cloud**(DB/Auth). service role key는 Phase 1에서 필요 없다.
+대상: **Vercel**(앱) + **Supabase Cloud**(DB/Auth). service role key는 현재 필요 없다.
+
+## 배포 체크리스트 (요약)
+
+1. [ ] Supabase 프로젝트 생성 → Project URL·anon key 확보
+2. [ ] 마이그레이션 `0001~0008` 순서대로 적용(SQL Editor 또는 `supabase db push`)
+3. [ ] Storage 버킷 `posters`(private) 생성 확인
+4. [ ] Auth → Email 활성화(운영은 Confirm email 켜기 + Redirect URL 등록)
+5. [ ] 최초 교사 계정 `profiles.role='teacher'` 수동 부여
+6. [ ] (선택) AI 챗봇용 서버 env `AI_API_KEY`(본인 Gemini 키) 등록
+7. [ ] Vercel 프로젝트 연결 + 환경 변수 등록
+8. [ ] 배포 후 스모크 테스트(§4)
+
+> **로컬 사전 검증**: 마이그레이션을 실제 적용하기 전에 `bash supabase/tests/validate_local.sh`
+> 로 로컬 Postgres에서 SQL·RLS를 미리 검증할 수 있다(모든 체크 ✓ PASS 확인).
 
 ## 1. Supabase 프로젝트 준비
 

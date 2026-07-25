@@ -93,7 +93,9 @@ npm run build
 - 우수작: "동료평가 기반 우수작 후보"(베이지안 보정+정규화) 추천 → 교사 루브릭 → 최종 선정(featured).
 - 챗봇: 산파법 7단계, 한 번에 질문 하나, 대필 차단, Zod 검증, Gemini adapter(+mock 폴백).
   키는 서버 env `AI_API_KEY`만, 학생 식별정보 미전송(`lib/ai/`, `docs/SECURITY.md`).
-- 주의: Storage·RLS·실제 Gemini 호출 런타임은 로컬 Supabase/키 미구성으로 미검증(코드/정책/절차만).
+- 검증: 마이그레이션 0001~0008 + 핵심 RLS 시나리오를 로컬 Postgres에서 실행·통과
+  (`supabase/tests/validate_local.sh`, RLS 14테이블/53정책). Gemini 실호출도 확인.
+- 남은 미검증: Storage 실버킷 런타임(정책 SQL은 적용 검증됨)은 실제 Supabase에서 확인 필요.
 
 Phase 6 진행 중: 학생 포트폴리오·교사 대시보드/통계·인쇄(PDF) 내보내기 구현.
 남은 항목(알림·접근성 자동점검·성능 측정·PDF 서버 렌더·배포 리허설)은 `docs/ROADMAP.md` 참조.
